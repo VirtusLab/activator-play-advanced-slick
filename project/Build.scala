@@ -18,7 +18,7 @@ object ApplicationBuild extends Build {
     javaCore,  // The core Java API
   
     // WebJars pull in client-side web libraries
-    "org.webjars" % "webjars-play" % "2.1.0",
+    "org.webjars" %% "webjars-play" % "2.1.0-2",
     "org.webjars" % "bootstrap" % "2.3.1"
   
     // Add your own project dependencies in the form:
@@ -26,7 +26,8 @@ object ApplicationBuild extends Build {
   )
 
   val main = play.Project(appName, appVersion, appDependencies).settings(
-    // Add your own project settings here      
+    // Add your own project settings here
+    scalaVersion := "2.10.2"
   )
 
 }
