@@ -18,7 +18,7 @@ object ApplicationBuild extends Build {
     javaCore,  // The core Java API
   
     // WebJars pull in client-side web libraries
-    "org.webjars" %% "webjars-play" % "2.1.0-2",
+    "org.webjars" %% "webjars-play" % "2.1.0-3",
     "org.webjars" % "bootstrap" % "2.3.1"
   
     // Add your own project dependencies in the form:
