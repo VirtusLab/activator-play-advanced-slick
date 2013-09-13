@@ -98,7 +98,7 @@ src='@routes.Assets.at("javascripts/index.min.js")'&gt;
     <h2> SBT Build</h2>
 
     <p>
-        SBT is the build system underneath Play applications.  It is responsible for resolving dependencies, compiling the project, running the tests, etc.  The primary build definition file is the <a href="#code/project/Build.scala" class="shortcut">Build.scala</a> file.  In that file you will see a comma-seperated list of dependencies which can be modified to suit your needs.  Play includes a number of libraries which can selectively be turned on/off.  For instance if you want to use JPA with Play, uncomment the <strong>javaJpa</strong> dependency.  You can also add your own dependencies in the SBT form:
+        SBT is the build system underneath Play applications.  It is responsible for resolving dependencies, compiling the project, running the tests, etc.  The primary build definition file is the <a href="#code/build.sbt" class="shortcut">build.sbt</a> file.  In that file you will see a comma-seperated list of dependencies which can be modified to suit your needs.  Play includes a number of libraries which can selectively be turned on/off.  For instance if you want to use JPA with Play, uncomment the <strong>javaJpa</strong> dependency.  You can also add your own dependencies in the SBT form:
         <pre><code>"group" % "artifact" % "version"</code></pre>
         <!-- todo: Learn more -->
     </p>
