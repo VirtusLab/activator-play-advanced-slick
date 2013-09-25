@@ -1,10 +1,146 @@
 <html>
 <head>
-    <title>Hello Play Framework - Activator Template</title>
+    <title>Super Slick Play - Activator Template</title>
 </head>
 <body>
 <div>
-    <p>You've just created a simple Play Framework application! Now lets explore the code and make some changes.</p>
+    <p>You've just created an application with the Super Slick Play template.  The template allows you to quickly create a Play application using Slick for database access.  The template has been pre-configured to use an in-memory database called H2.  </p>
+
+   <h2>Set up the database</h2> 
+
+   <p>
+	The template you're using is already set up with an in-memory instance of the H2 database.  You can leave this as it is and skip this section if you want to continue using this database.  
+   </p>	
+   <p>
+	It is sometimes advantageous to use H2 in file mode rather than in memory.  This will allow debugging through things like the h2-browser or other methods of access to H2.  To make this change, edit the conf/application.conf file and find the line that specifies the default url : 
+
+	<pre><code>db.default.url="jdbc:h2:mem:play"</code></pre>
+	
+	In order to use a file-based database, change this to 
+
+	<pre><code>db.default.url="jdbc:h2:/path/to/file</code></pre> 
+
+	You can then get access to the database by shutting down any processes (including Play) that are accessing it and using the following commands
+
+	<pre><code>play</code></pre>
+	<pre><code>h2-browser</code></pre> 
+
+	And then enter the same URL to access H2.  
+
+    </p>
+
+    <p> 
+	To use a different database technology, use the instructions on the <a href="http://www.playframework.com/documentation/2.2.x/ScalaDatabase">Play Documentation site</a> 
+    </p>
+
+</div>
+
+<div>
+	<h2>Create tables</h2> 
+
+    <p>
+	Play includes a function called <a href="http://www.playframework.com/documentation/2.2.x/Evolutions">evolutions</a> that allows the management of database schema changes.  To use evolutions, create an evolutions folder for the default database as conf/evolutions/default
+	then create .sql scripts that will put the database into the appropriate state.  Evolutions also has the ability to revert the database to a previous version.  For example, create a file
+	called conf/evolutions/default/1.sql with the following content:
+
+	<pre><code>
+# Resources schema
+ 
+# --- !Ups
+ 
+CREATE TABLE Resource (
+    id bigint(20) NOT NULL AUTO_INCREMENT,
+    first varchar(255) NOT NULL,
+        last varchar(255) NOT NULL,
+    PRIMARY KEY (id)
+);
+ 
+# --- !Downs
+ 
+DROP TABLE Resource;
+</code></pre>
+
+	When you load up your application, you will be prompted to apply the script(s).  
+	</p>
+
+</div>
+<div>
+	<h2>Create the models</h2> 
+
+	<p>In order to create a set of models in play that will use Slick to access the database, you need to create the models.  The Slick site at <a href="http://slick.typesafe.com">slick.typesafe.com</a> 
+	has an excellent set of documentation. </p> 
+
+	<p>To create a model to access our "Resource" table, create a file in app/models called Resource.scala </p>
+	<pre><code>
+		package models
+// Importing the slick driver
+import play.api.db.slick.Config.driver.simple._
+
+// The case class to represent the data object
+case class Resource(id: Option[Int] = None, first: String, last: String)
+
+// The static object that does the actual work - note the names of tables and fields in H2 are case sensitive and must be all caps 
+object Resources extends Table[Resource]("RESOURCE") {
+  def id = column[Int]("ID", O.PrimaryKey, O.AutoInc)
+  def first = column[String]("FIRST")
+  def last = column[String]("LAST")
+
+  // Every table needs a * projection with the same type as the table's type parameter
+  def * = id.? ~ first ~ last <> (Resource, Resource.unapply _)
+
+  // This custom insert method allows the return of the auto increment id when the row is inserted without specifying it
+  def forInsert = first ~ last  <> ({ t => Resource(None, t._1, t._2)}, { (r: Resource) => Some ((r.first, r.last))})
+}
+</code></pre> 
+	<p>Some important items to note - H2 capitalizes all table and column names and is <b>case sensitive</b></p>
+
+
+</div>
+<div>
+	<h2>Insert some initial data</h2> 
+	<p>If you want to put some initial data into the table we created, create a file called Global.scala in the app directory with the following content </p>
+
+	<pre><code> 
+	import play.api.db.DB
+import play.api.GlobalSettings
+// Use H2Driver to connect to an H2 database
+import play.api.db.slick.Config.driver.simple._
+
+
+
+import play.api.Application
+import play.api.Play.current
+
+import models._
+
+
+object Global extends GlobalSettings {
+
+  override def onStart(app: Application) {
+
+    InitialData.insert()
+  
+  }
+
+object InitialData {
+
+	
+	def insert() = {
+	  
+	 
+		play.api.db.slick.DB.withSession { 
+		  implicit session:Session =>
+              val resourceOneId = Resources.forInsert returning Resources.id insert(Resource(None, "Great", "Engineer"))
+		}
+	}
+    }
+}
+	</code></pre>
+
+</div>
+
+<div>
+
 
     <h2> View the App</h2>
 
@@ -32,6 +168,7 @@
         <pre><code>GET   /foo    controllers.MainController.index</code></pre>
         Now retry the request and you should see the default index page.<br/>
         By default the routes are compiled by Play so that they can be used in a type-safe way.  This prevents issues caused by incorrect URL usages.
+
         <!-- todo: Learn more -->
     </p>
 </div>
