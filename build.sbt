@@ -2,6 +2,8 @@ name := "hello-play"
 
 version := "1.0-SNAPSHOT"
 
+resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+
 libraryDependencies ++= Seq(
   // Select Play modules
   //jdbc,      // The JDBC connection pool and the play.api.db API
