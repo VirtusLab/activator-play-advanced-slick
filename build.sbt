@@ -1,4 +1,4 @@
-name := "hello-play"
+name := "play-slick-advanced"
 
 version := "1.0-SNAPSHOT"
 

@@ -1,0 +1,20 @@
+package service
+
+import model._
+
+/**
+ * Queries for users.
+ * It brings all base queries with it from [[service.BaseIdQueries]], but you can add yours as well.
+ */
+trait UsersQueries extends BaseIdQueries[UserId, User] {
+  override def table = Users
+}
+
+/**
+ * Service for users.
+ *
+ * It brings all base service methods with it from [[service.BaseIdService]], but you can add yours as well.
+ *
+ * It's a trait, so you can use your favourite DI method to instantiate/mix it to your application.
+ */
+trait UsersService extends BaseIdService[UserId, User] with UsersQueries

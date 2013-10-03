@@ -4,6 +4,7 @@
 </head>
 <body>
 <div>
+    <!-- TODO - change -->
     <p>You've just created an application with the Super Slick Play template.  The template allows you to quickly create a Play application using Slick for database access.  The template has been pre-configured to use an in-memory database called H2.  </p>
 
    <h2>Set up the database</h2> 
@@ -64,8 +65,10 @@ DROP TABLE Resource;
 	</p>
 
 </div>
+
 <div>
-	<h2>Create the models</h2> 
+    <!-- TODO - change -->
+	<h2>Create the models</h2>
 
 	<p>In order to create a set of models in play that will use Slick to access the database, you need to create the models.  The Slick site at <a href="http://slick.typesafe.com">slick.typesafe.com</a> 
 	has an excellent set of documentation. </p> 
@@ -96,8 +99,10 @@ object Resources extends Table[Resource]("RESOURCE") {
 
 
 </div>
+
 <div>
-	<h2>Insert some initial data</h2> 
+    <!-- TODO - change -->
+    <h2>Insert some initial data</h2>
 	<p>If you want to put some initial data into the table we created, create a file called Global.scala in the app directory with the following content </p>
 
 	<pre><code> 
@@ -139,6 +144,18 @@ object InitialData {
 
 </div>
 
+<!-- TODO - change -->
+<div>
+    <h2>Queries and Services</h2>
+    <p></p>
+</div>
+
+<!-- TODO - change -->
+<div>
+    <h2>Adding your own class</h2>
+    <p></p>
+</div>
+
 <div>
 
 
@@ -151,11 +168,13 @@ object InitialData {
         Controllers asynchronously return HTTP responses of any content type (i.e. HTML, JSON, binary).  To see a JSON response produced by a Scala controller, click the "Get JSON Message" button.  This uses AJAX via jQuery to get data from the server and then display that on the web page.
     </p>
 </div>
+
 <div>
     <h2> Code Overview</h2>
 
     <p>A Play application has very few required files.  This example tries to illustrate a number of key concepts in Play so it has a handful of files to explain.  The <a href="#code/app" class="shortcut">app</a> directory contains the application's source code, including Java, Scala, server-side templates, and server-side compiled assets for the browser (e.g. JavaScript, CoffeeScript, LESS).  The <a href="#code/conf" class="shortcut">conf</a> directory contains the <a href="#code/conf/application.conf" class="shortcut">application.conf</a> config file and the <a href="#code/conf/routes" class="shortcut">routes</a> file</a>.  The <a href="#code/project" class="shortcut">project</a> directory contains the SBT build information for the app.  The default place for static assets (e.g. images, HTML, CSS, JavaScript) is the <a href="#code/public" class="shortcut">public</a> directory.  Unit, functional, and integration tests (Java and Scala) go in the <a href="#code/test" class="shortcut">test</a> directory.</p>
 </div>
+
 <div>
     <h2> HTTP Routing</h2>
 
@@ -172,6 +191,7 @@ object InitialData {
         <!-- todo: Learn more -->
     </p>
 </div>
+
 <div>
     <h2> Controllers</h2>
 
@@ -183,6 +203,7 @@ object InitialData {
         <!-- todo: Learn more -->
     </p>
 </div>
+
 <div>
     <h2> Templates</h2>
 
@@ -196,6 +217,7 @@ object InitialData {
         <!-- todo: Learn more -->
     </p>
 </div>
+
 <div>
     <h2> Static Assets</h2>
 
@@ -207,6 +229,7 @@ object InitialData {
         <!-- todo: Learn more -->
     </p>
 </div>
+
 <div>
     <h2> Asset Compiler</h2>
 
@@ -221,6 +244,7 @@ src='@routes.Assets.at("javascripts/index.min.js")'&gt;
         <!-- todo: Learn more -->
     </p>
 </div>
+
 <div>
     <h2> Test the App</h2>
 
@@ -231,6 +255,7 @@ src='@routes.Assets.at("javascripts/index.min.js")'&gt;
         <!-- todo: Learn more -->
     </p>
 </div>
+
 <div>
     <h2> SBT Build</h2>
 
@@ -240,6 +265,7 @@ src='@routes.Assets.at("javascripts/index.min.js")'&gt;
         <!-- todo: Learn more -->
     </p>
 </div>
+
 <div>
     <h2>Typesafe Console</h2>
 
@@ -252,6 +278,7 @@ src='@routes.Assets.at("javascripts/index.min.js")'&gt;
     </p>
 
 </div>
+
 <div>
     <h2> Further Learning</h2>
 
@@ -261,5 +288,6 @@ src='@routes.Assets.at("javascripts/index.min.js")'&gt;
         <a href="http://groups.google.com/group/play-framework" target="_blank">The play-framework</a> Google Group is a great place to discuss Play.<br/>
     </p>
 </div>
+
 </body>
 </html>
