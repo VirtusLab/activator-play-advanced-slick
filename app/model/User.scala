@@ -1,6 +1,6 @@
 package model
 
-import db.{IdTable, Id, IdMapping, BaseId}
+import db.{IdTable, Id, IdCompanion, BaseId}
 import scala.slick.session.Session
 
 /** Id class for type-safe joins and queries. */
@@ -9,7 +9,7 @@ case class UserId(id: Long) extends AnyVal with BaseId
 /** Companion object for id class, extends IdMapping
   * and brings all required implicits to scope when needed.
   */
-object UserId extends IdMapping(Users)
+object UserId extends IdCompanion(Users)
 
 /** User entity.
   *
@@ -22,7 +22,6 @@ case class User(id: Option[UserId],
                 email: String,
                 firstName: String,
                 lastName: String) extends Id[UserId]
-
 
 /** Table definition for users. */
 object Users extends IdTable[UserId, User]("users", UserId.apply) {
@@ -37,7 +36,6 @@ object Users extends IdTable[UserId, User]("users", UserId.apply) {
 
   def * = id.? ~: base <> (User.apply _, User.unapply _)
 
-  // TODO - can we simplify this?
   def insertOne(elem: User)(implicit session: Session): UserId =
     saveBase(base, User.unapply _)(elem)
 }

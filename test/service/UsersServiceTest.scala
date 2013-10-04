@@ -6,7 +6,7 @@ import play.api.db.slick.DB
 import model.User
 import scala.slick.session.Session
 
-class UserServiceTest extends Specification {
+class UsersServiceTest extends Specification {
 
   "Users Service" should {
 
@@ -25,6 +25,5 @@ class UserServiceTest extends Specification {
           userOpt.flatMap(_.id) must not be_=== None
       }
     }
-
   }
 }

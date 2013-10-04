@@ -1,6 +1,7 @@
 package service
 
 import model._
+import play.api.db.slick.Config.driver.simple._
 
 /**
  * Queries for users.

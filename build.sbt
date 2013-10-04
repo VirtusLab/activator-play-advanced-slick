@@ -15,13 +15,11 @@ libraryDependencies ++= Seq(
   javaCore,  // The core Java API
   // WebJars pull in client-side web libraries
   "org.webjars" %% "webjars-play" % "2.2.0",
-  "org.webjars" % "bootstrap" % "2.3.1"
+  "org.webjars" % "bootstrap" % "2.3.1",
+  "com.typesafe.slick" %% "slick" % "1.0.1",
+  "com.typesafe.play" %% "play-slick" % "0.5.0.2-SNAPSHOT"
   // Add your own project dependencies in the form:
   // "group" % "artifact" % "version"
 )
 
 play.Project.playScalaSettings
-
-libraryDependencies += "com.typesafe.slick" %% "slick" % "1.0.1"
-
-libraryDependencies += "com.typesafe.play" %% "play-slick" % "0.5.0.2-SNAPSHOT"

@@ -1,194 +1,287 @@
 <html>
 <head>
-    <title>Super Slick Play - Activator Template</title>
+    <title>Play Slick with Typesafe IDs - Activator Template</title>
 </head>
 <body>
 <div>
-    <!-- TODO - change -->
-    <p>You've just created an application with the Super Slick Play template.  The template allows you to quickly create a Play application using Slick for database access.  The template has been pre-configured to use an in-memory database called H2.  </p>
+    <p>
+        You've just created an application with the Play Slick with Typesafe IDs template. This template allows you to
+        quickly create a Play application using Slick for database access. The template has been pre-configured to use
+        an in-memory database called H2.
 
-   <h2>Set up the database</h2> 
-
-   <p>
-	The template you're using is already set up with an in-memory instance of the H2 database.  You can leave this as it is and skip this section if you want to continue using this database.  
-   </p>	
-   <p>
-	It is sometimes advantageous to use H2 in file mode rather than in memory.  This will allow debugging through things like the h2-browser or other methods of access to H2.  To make this change, edit the conf/application.conf file and find the line that specifies the default url : 
-
-	<pre><code>db.default.url="jdbc:h2:mem:play"</code></pre>
-	
-	In order to use a file-based database, change this to 
-
-	<pre><code>db.default.url="jdbc:h2:/path/to/file</code></pre> 
-
-	You can then get access to the database by shutting down any processes (including Play) that are accessing it and using the following commands
-
-	<pre><code>play</code></pre>
-	<pre><code>h2-browser</code></pre> 
-
-	And then enter the same URL to access H2.  
-
+        This template was derived from Slick creator's type-safe id's idea presented on ScalaDays 2013.
     </p>
 
-    <p> 
-	To use a different database technology, use the instructions on the <a href="http://www.playframework.com/documentation/2.2.x/ScalaDatabase">Play Documentation site</a> 
-    </p>
-
-</div>
-
-<div>
-	<h2>Create tables</h2> 
+    <h2>Set up the database</h2>
 
     <p>
-	Play includes a function called <a href="http://www.playframework.com/documentation/2.2.x/Evolutions">evolutions</a> that allows the management of database schema changes.  To use evolutions, create an evolutions folder for the default database as conf/evolutions/default
-	then create .sql scripts that will put the database into the appropriate state.  Evolutions also has the ability to revert the database to a previous version.  For example, create a file
-	called conf/evolutions/default/1.sql with the following content:
+        The template you're using is already set up with an in-memory instance of the H2 database. You can leave this as
+        it is and skip this section if you want to continue using this database.
+    </p>
 
-	<pre><code>
-# Resources schema
- 
-# --- !Ups
- 
-CREATE TABLE Resource (
-    id bigint(20) NOT NULL AUTO_INCREMENT,
-    first varchar(255) NOT NULL,
-        last varchar(255) NOT NULL,
-    PRIMARY KEY (id)
-);
- 
-# --- !Downs
- 
-DROP TABLE Resource;
-</code></pre>
+    <p>
+        It is sometimes advantageous to use H2 in file mode rather than in memory. This will allow debugging through
+        things like the h2-browser or other methods of access to H2. To make this change, edit the conf/application.conf
+        file and find the line that specifies the default url:
 
-	When you load up your application, you will be prompted to apply the script(s).  
-	</p>
+        <pre><code>db.default.url="jdbc:h2:mem:play"</code></pre>
 
-</div>
+        In order to use a file-based database, change this to
 
-<div>
-    <!-- TODO - change -->
-	<h2>Create the models</h2>
+        <pre><code>db.default.url="jdbc:h2:/path/to/file</code></pre>
 
-	<p>In order to create a set of models in play that will use Slick to access the database, you need to create the models.  The Slick site at <a href="http://slick.typesafe.com">slick.typesafe.com</a> 
-	has an excellent set of documentation. </p> 
+        You can then get access to the database by shutting down any processes (including Play) that are accessing it and
+        using the following commands
 
-	<p>To create a model to access our "Resource" table, create a file in app/models called Resource.scala </p>
-	<pre><code>
-		package models
-// Importing the slick driver
-import play.api.db.slick.Config.driver.simple._
+        <pre><code>play</code></pre>
+        <pre><code>h2-browser</code></pre>
 
-// The case class to represent the data object
-case class Resource(id: Option[Int] = None, first: String, last: String)
+        And then enter the same URL to access H2.
+    </p>
 
-// The static object that does the actual work - note the names of tables and fields in H2 are case sensitive and must be all caps 
-object Resources extends Table[Resource]("RESOURCE") {
-  def id = column[Int]("ID", O.PrimaryKey, O.AutoInc)
-  def first = column[String]("FIRST")
-  def last = column[String]("LAST")
-
-  // Every table needs a * projection with the same type as the table's type parameter
-  def * = id.? ~ first ~ last <> (Resource, Resource.unapply _)
-
-  // This custom insert method allows the return of the auto increment id when the row is inserted without specifying it
-  def forInsert = first ~ last  <> ({ t => Resource(None, t._1, t._2)}, { (r: Resource) => Some ((r.first, r.last))})
-}
-</code></pre> 
-	<p>Some important items to note - H2 capitalizes all table and column names and is <b>case sensitive</b></p>
-
+    <p>
+        To use a different database technology, use the instructions on the <a
+            href="http://www.playframework.com/documentation/2.2.x/ScalaDatabase">Play Documentation site</a>
+    </p>
 
 </div>
 
 <div>
-    <!-- TODO - change -->
-    <h2>Insert some initial data</h2>
-	<p>If you want to put some initial data into the table we created, create a file called Global.scala in the app directory with the following content </p>
+    <h2>Create tables</h2>
 
-	<pre><code> 
-	import play.api.db.DB
-import play.api.GlobalSettings
-// Use H2Driver to connect to an H2 database
-import play.api.db.slick.Config.driver.simple._
+    <p>
+        Play includes a function called <a
+            href="http://www.playframework.com/documentation/2.2.x/Evolutions">evolutions</a> that allows the management
+        of database schema changes. To use evolutions, create an evolutions folder for the default database as
+        <strong>conf/evolutions/default</strong>
+        then create .sql scripts that will put the database into the appropriate state. Evolutions also has the ability
+        to revert the database to a previous version.
 
+        This template uses play-slick DDL plugin that creates 1.sql file for you automatically for all tables defined in
+        "model" package. To disable this feature or change package see <a href="#code/conf/application.conf"
+                                                                          class="shortcut">application.conf</a> and change
+        <strong>slick.default="model.*"</strong> parameter.
 
+        In this example, this plugin will create a file called conf/evolutions/default/1.sql with the following content:
+    </p>
 
-import play.api.Application
-import play.api.Play.current
+    <pre><code>
+    # --- Created by Slick DDL
+    # To stop Slick DDL generation, remove this comment and start using Evolutions
 
-import models._
+    # --- !Ups
 
+    create table "comments" (
+    "id" BIGINT GENERATED BY DEFAULT AS IDENTITY(START WITH 1) NOT NULL PRIMARY KEY,
+    "text" VARCHAR NOT NULL,
+    "author" BIGINT NOT NULL,
+    "date" TIMESTAMP NOT NULL);
 
-object Global extends GlobalSettings {
+    create table "users" (
+      "id" BIGINT GENERATED BY DEFAULT AS IDENTITY(START WITH 1) NOT NULL PRIMARY KEY,
+      "email" VARCHAR NOT NULL,
+      "first_name" VARCHAR NOT NULL,
+      "last_name" VARCHAR NOT NULL
+    );
 
-  override def onStart(app: Application) {
+    alter table "comments" add constraint "comments_author_fk" foreign key("author") references "users"("id") on update NO ACTION on delete NO ACTION;
 
-    InitialData.insert()
-  
-  }
+    # --- !Downs
 
-object InitialData {
+    alter table "comments" drop constraint "comments_author_fk";
+    drop table "comments";
+    drop table "users";
+    </code></pre>
 
-	
-	def insert() = {
-	  
-	 
-		play.api.db.slick.DB.withSession { 
-		  implicit session:Session =>
-              val resourceOneId = Resources.forInsert returning Resources.id insert(Resource(None, "Great", "Engineer"))
-		}
-	}
-    }
-}
-	</code></pre>
+    <p>
+        When you load up your application, you will be prompted to apply the script(s).
+    </p>
 
 </div>
 
-<!-- TODO - change -->
 <div>
-    <h2>Queries and Services</h2>
-    <p></p>
+    <h2>Create the models</h2>
+
+    <p>
+        In order to create a set of models in play that will use Slick to access the database, you need to create the
+        models. The Slick site at <a href="http://slick.typesafe.com">slick.typesafe.com</a>
+        has an excellent set of documentation.
+    </p>
+
+    <p>
+        This template, however, uses small library that enables usage of type safe primary and foreign keys in
+        your application. Example entity created with this library can be shown <a href="#code/app/model/User.scala" class="shortcut">here.</a>
+    </p>
+
+    <p>Entity declaration contains of four parts:
+    <ul>
+        <li>Case class for your type-safe id. It has to <strong>extends AnyVal with BaseId</strong> and contain id
+            field of type <strong>Long</strong>.
+        </li>
+        <li>Companion object for your id. It have to extend <strong>IdCompanion</strong> which accepts table for your
+            entity (see below). This step provides you with implicits needed in slick queries and Play! mappings.
+        </li>
+        <li>Your domain model entity. It has to <strong>extend Id[YourEntityId]</strong>.</li>
+        <li>Table definition for your entity. It <strong>extends IdTable[YourEntityId, YourEntity]</strong>, which
+            accepts table name (and optionally schema name) and <strong>YourEntityId.unapply</strong> function.
+        </li>
+    </ul>
+    </p>
+
 </div>
 
-<!-- TODO - change -->
 <div>
-    <h2>Adding your own class</h2>
-    <p></p>
+    <h2>Gain base service methods for free!</h2>
+
+    <p>
+        When you have entity declaration you get (almost) free basic queries and service methods for it. Example is
+        shown in <a href="#code/app/service/UsersService.scala" class="shortcut">UsersService</a>. It contains trait for
+        queries and trait for service. This 4 lines of code enables you to save your entities, query or delete them by
+        id and some more.
+    </p>
+
+    <p>
+        Example usage can be shown in <a href="#code/test/service/UsersServiceTest.scala" class="shortcut">UsersServiceTest</a>.
+    </p>
 </div>
 
 <div>
+    <h2>Adding next class - type-safe joins</h2>
 
+    <p>
+        Let's add new class to our model. It will be a <a href="#code/app/model/Comment.scala"
+                                                          class="shortcut">Comment</a>. With an exception of class names
+        and fields it's same as <a href="#code/app/model/User.scala" class="shortcut">User</a>.
+    </p>
 
+    <p>
+        In queries for comments (<a href="#code/app/service/CommentsService.scala" class="shortcut">CommentsService</a>) we can now create query joining on type-safe userId:
+    </p>
+
+    <pre><code>
+        // parametrized query using UserId
+        protected val commentsForUserQuery = for {
+            userId <- Parameters[UserId]
+            // type-safe join, if you pass here any other id or Long it wont compile!
+            comment <- Comments if comment.authorId === userId
+        } yield comment
+    </code></pre>
+
+    <p>
+        Than, in <strong>CommentsService</strong> you can create service method for searching comments by userId:
+    </p>
+
+    <pre><code>
+        def findForUserId(userId: UserId)(implicit session: Session): Seq[Comment] =
+            commentsForUserQuery.list(userId)
+    </code></pre>
+
+    <p>
+        At last, let's test your new service in <a href="#code/test/service/CommentsServiceTest.scala" class="shortcut">CommentsServiceTest</a>:
+    </p>
+
+    <pre><code>
+        object UsersService extends UsersService
+        object CommentsService extends CommentsService
+
+        val user = User(None, "test@email.com", "Krzysztof", "Nowak")
+        val userId = UsersService save user
+
+        val comments = Seq(
+            Comment(None, "It's nice", userId, DateTime.now()),
+            Comment(None, "It's very nice", userId, DateTime.now()),
+            Comment(None, "Those comments are not spam", userId, DateTime.now())
+        )
+
+        val commentIds = CommentsService saveAll comments
+
+        val queriedComments = CommentsService findForUserId userId
+
+        queriedComments.size must be_=== (comments.size)
+        queriedComments.flatMap(_.id) must containAllOf(commentIds)
+    </code></pre>
+</div>
+
+<div>
+    <h2>Additional goodies</h2>
+
+    <p>
+        Your type-safe IDs are designed not only to work with SLick, but also with Play! framework internals. You can
+        also use them in mappings (beloved <a href="http://www.playframework.com/documentation/2.2.x/ScalaForms"
+                                              target="_blank">Play! forms API</a>) and <a
+            href="http://www.playframework.com/documentation/2.2.x/ScalaRouting" target="_blank">routes</a> without any
+        added work and benefit from type-safety in you application.
+    </p>
+
+    <p>Using IDs in form mappings:</p>
+    <pre><code>
+        val userMapping = Form(
+            mapping(
+                "id" -> of[UserId], // it will be read from Long and packed to UserId
+                "email" -> email,
+                "firstName" -> text,
+                "lastName" -> text
+            )(User.apply)(User.unappply)
+        )
+    </code></pre>
+
+    <p>Using IDs in routes:</p>
+    <pre><code>
+        // it will be read from Long and packed to UserId, so you can use it like that in controller method
+        /user/show/:id      controllers.UsersController.show(id: model.UserId)
+    </code></pre>
+</div>
+
+<div>
     <h2> View the App</h2>
 
     <p>
-        Once the application has been compiled and the server started, your application can be accessed at: <a href="http://localhost:9000" target="_blank">http://localhost:9000</a><br/>
+        Once the application has been compiled and the server started, your application can be accessed at: <a
+            href="http://localhost:9000" target="_blank">http://localhost:9000</a><br/>
         Check in <a href="#run" class="shortcut">Run</a> to see the server status.<br/>
-        When you make an HTTP request to that URL, the Play server figures out what code to execute which will handle the request and return a response.  In this application the request handler for requests to the root URL (e.g. "/") are handled by a Java Controller.  You can use Java and Scala to create your controllers.<br/>
-        Controllers asynchronously return HTTP responses of any content type (i.e. HTML, JSON, binary).  To see a JSON response produced by a Scala controller, click the "Get JSON Message" button.  This uses AJAX via jQuery to get data from the server and then display that on the web page.
+        When you make an HTTP request to that URL, the Play server figures out what code to execute which will handle
+        the request and return a response. In this application the request handler for requests to the root URL (e.g.
+        "/") are handled by a Java Controller. You can use Java and Scala to create your controllers.<br/>
+        Controllers asynchronously return HTTP responses of any content type (i.e. HTML, JSON, binary). To see a JSON
+        response produced by a Scala controller, click the "Get JSON Message" button. This uses AJAX via jQuery to get
+        data from the server and then display that on the web page.
     </p>
 </div>
 
 <div>
     <h2> Code Overview</h2>
 
-    <p>A Play application has very few required files.  This example tries to illustrate a number of key concepts in Play so it has a handful of files to explain.  The <a href="#code/app" class="shortcut">app</a> directory contains the application's source code, including Java, Scala, server-side templates, and server-side compiled assets for the browser (e.g. JavaScript, CoffeeScript, LESS).  The <a href="#code/conf" class="shortcut">conf</a> directory contains the <a href="#code/conf/application.conf" class="shortcut">application.conf</a> config file and the <a href="#code/conf/routes" class="shortcut">routes</a> file</a>.  The <a href="#code/project" class="shortcut">project</a> directory contains the SBT build information for the app.  The default place for static assets (e.g. images, HTML, CSS, JavaScript) is the <a href="#code/public" class="shortcut">public</a> directory.  Unit, functional, and integration tests (Java and Scala) go in the <a href="#code/test" class="shortcut">test</a> directory.</p>
+    <p>A Play application has very few required files. This example tries to illustrate a number of key concepts in Play
+        so it has a handful of files to explain. The <a href="#code/app" class="shortcut">app</a> directory contains the
+        application's source code, including Java, Scala, server-side templates, and server-side compiled assets for the
+        browser (e.g. JavaScript, CoffeeScript, LESS). The <a href="#code/conf" class="shortcut">conf</a> directory
+        contains the <a href="#code/conf/application.conf" class="shortcut">application.conf</a> config file and the <a
+                href="#code/conf/routes" class="shortcut">routes</a> file</a>. The <a href="#code/project"
+                                                                                      class="shortcut">project</a>
+        directory contains the SBT build information for the app. The default place for static assets (e.g. images,
+        HTML, CSS, JavaScript) is the <a href="#code/public" class="shortcut">public</a> directory. Unit, functional,
+        and integration tests (Java and Scala) go in the <a href="#code/test" class="shortcut">test</a> directory.</p>
 </div>
 
 <div>
     <h2> HTTP Routing</h2>
 
     <p>
-        The <a href="#code/conf/routes" class="shortcut">routes</a> file contains mappings between HTTP request verbs &amp; paths and the code that controller method that handles the requests.  Route paths can be parametrized to support RESTful style URLs.  The following mapping will handle HTTP GET requests to "/" using the <strong>controllers.MainController.index</strong> method:
-        <pre><code>GET   /    controllers.MainController.index</code></pre>
-        You can try out the routing by first making a request to an unmatched route, like: <a href="http://localhost:9000/foo" target="_blank">http://localhost:9000/foo</a><br/>
-        This should produce an error because there isn't a route that matches the request.
-        Then edit the <a href="#code/conf/routes" class="shortcut">routes</a> to include a new route:
-        <pre><code>GET   /foo    controllers.MainController.index</code></pre>
-        Now retry the request and you should see the default index page.<br/>
-        By default the routes are compiled by Play so that they can be used in a type-safe way.  This prevents issues caused by incorrect URL usages.
+        The <a href="#code/conf/routes" class="shortcut">routes</a> file contains mappings between HTTP request verbs
+        &amp; paths and the code that controller method that handles the requests. Route paths can be parametrized to
+        support RESTful style URLs. The following mapping will handle HTTP GET requests to "/" using the <strong>controllers.MainController.index</strong>
+        method:
+    <pre><code>GET / controllers.MainController.index</code></pre>
+    You can try out the routing by first making a request to an unmatched route, like: <a
+        href="http://localhost:9000/foo" target="_blank">http://localhost:9000/foo</a><br/>
+    This should produce an error because there isn't a route that matches the request.
+    Then edit the <a href="#code/conf/routes" class="shortcut">routes</a> to include a new route:
+    <pre><code>GET /foo controllers.MainController.index</code></pre>
+    Now retry the request and you should see the default index page.<br/>
+    By default the routes are compiled by Play so that they can be used in a type-safe way. This prevents issues caused
+    by incorrect URL usages.
 
-        <!-- todo: Learn more -->
+    <!-- todo: Learn more -->
     </p>
 </div>
 
@@ -196,10 +289,31 @@ object InitialData {
     <h2> Controllers</h2>
 
     <p>
-        HTTP GET requests to <a href="http://localhost:9000/" target="_blank">http://localhost:9000/</a> are handled by the index method defined in the <a href="#code/app/controllers/MainController.java" class="shortcut">MainController.java</a> file.  This static method returns a <strong>Result</strong> which in this case consists of a server-side rendered template and an HTTP 200 response which is represented by the <strong>ok</strong> method call.  You can also use non-static methods along with Dependency Injection frameworks like Spring, Guice, and CDI. <!-- todo:  (<a href="http://TODO" target="_blank">Learn More...</a>) --><br/>
-        You can change the "Hello from Java" string in <a href="#code/app/controllers/MainController.java" class="shortcut">MainController.java</a> a different value, like "Hello from Play", then save the file and reload <a href="http://localhost:9000/" target="_blank">the index page</a> in your browser.  Play will automatically recompile the controller and you should immediately see your changes.<br/>
-        If your changes result in a compile error you will see the error in your browser (after a refresh) and in the <a href="#compile" class="shortcut">Compile Plugin</a>.  Try it by removing one of the double-quotes in the <strong>index</strong> method's string, save the file, and reload the index page.  Fix the error before you continue.<br/>
-        There is also a Scala controller which provides an example JSON service.  (Note: Play also has built-in JSON support in Java controllers.)  You can see the JSON by opening <a href="http://localhost:9000/message" target="_blank">http://localhost:9000/message</a> in your browser.  This route is also mapped in the <a href="#code/conf/routes" class="shortcut">routes</a> file but this time the request is handled by the <a href="#code/app/controllers/MessageController.scala" class="shortcut">MessageController.scala</a> file's <strong>getMessage</strong> function.  This controller returns an <strong>Action</strong> which is responsible for producing a HTTP response.  In this case the response is a <strong>case class</strong> which is serialized to JSON.  You will also notice the <strong>MessageController</strong> contains a function called <strong>javascriptRoutes</strong> which provides a mechanism for using the type-safe routes in JavaScript.
+        HTTP GET requests to <a href="http://localhost:9000/" target="_blank">http://localhost:9000/</a> are handled by
+        the index method defined in the <a href="#code/app/controllers/MainController.java" class="shortcut">MainController.java</a>
+        file. This static method returns a <strong>Result</strong> which in this case consists of a server-side rendered
+        template and an HTTP 200 response which is represented by the <strong>ok</strong> method call. You can also use
+        non-static methods along with Dependency Injection frameworks like Spring, Guice, and CDI.
+        <!-- todo:  (<a href="http://TODO" target="_blank">Learn More...</a>) --><br/>
+        You can change the "Hello from Java" string in <a href="#code/app/controllers/MainController.java"
+                                                          class="shortcut">MainController.java</a> a different value,
+        like "Hello from Play", then save the file and reload <a href="http://localhost:9000/" target="_blank">the index
+        page</a> in your browser. Play will automatically recompile the controller and you should immediately see your
+        changes.<br/>
+        If your changes result in a compile error you will see the error in your browser (after a refresh) and in the <a
+            href="#compile" class="shortcut">Compile Plugin</a>. Try it by removing one of the double-quotes in the
+        <strong>index</strong> method's string, save the file, and reload the index page. Fix the error before you
+        continue.<br/>
+        There is also a Scala controller which provides an example JSON service. (Note: Play also has built-in JSON
+        support in Java controllers.) You can see the JSON by opening <a href="http://localhost:9000/message"
+                                                                         target="_blank">http://localhost:9000/message</a>
+        in your browser. This route is also mapped in the <a href="#code/conf/routes" class="shortcut">routes</a> file
+        but this time the request is handled by the <a href="#code/app/controllers/MessageController.scala"
+                                                       class="shortcut">MessageController.scala</a> file's <strong>getMessage</strong>
+        function. This controller returns an <strong>Action</strong> which is responsible for producing a HTTP response.
+        In this case the response is a <strong>case class</strong> which is serialized to JSON. You will also notice the
+        <strong>MessageController</strong> contains a function called <strong>javascriptRoutes</strong> which provides a
+        mechanism for using the type-safe routes in JavaScript.
         <!-- todo: Learn more -->
     </p>
 </div>
@@ -208,13 +322,25 @@ object InitialData {
     <h2> Templates</h2>
 
     <p>
-        The <strong>MainController.index</strong> method uses a template which is compiled by Play into a function.  The source is in the <a href="#code/app/views/index.scala.html" class="shortcut">index.scala.html</a> file and is available by calling the <strong>views.html.index.render</strong> function.  This template takes a parameter of a <strong>String</strong> so the compiled function also takes a <strong>String</strong> parameter.  The default templating language in Play is Scala, but a number of other templating languages (like Java, Groovy, and Dust) can also be plugged in.<br/>
-        The <a href="#code/app/views/index.scala.html" class="shortcut">index template</a> uses the <a href="#code/app/views/main.scala.html" class="shortcut">main template</a> by calling the <strong>main</strong> function with the required parameters.<br/>
+        The <strong>MainController.index</strong> method uses a template which is compiled by Play into a function. The
+        source is in the <a href="#code/app/views/index.scala.html" class="shortcut">index.scala.html</a> file and is
+        available by calling the <strong>views.html.index.render</strong> function. This template takes a parameter of a
+        <strong>String</strong> so the compiled function also takes a <strong>String</strong> parameter. The default
+        templating language in Play is Scala, but a number of other templating languages (like Java, Groovy, and Dust)
+        can also be plugged in.<br/>
+        The <a href="#code/app/views/index.scala.html" class="shortcut">index template</a> uses the <a
+            href="#code/app/views/main.scala.html" class="shortcut">main template</a> by calling the
+        <strong>main</strong> function with the required parameters.<br/>
         Notice that the templates do not use hard-coded URLs and instead use Play's reverse routing, like:
-        <pre><code>@routes.Assets.at("images/favicon.png")</code></pre>
-        This provides a type-safe way to specify URLs in an application.  If the URL to a file changes, then automatically, the new value will be used throughout all of the URL references.  You can use the reverse router anywhere in your code, like redirects in controllers.<br/>
-        Like controllers (and all source code in Play) you can make changes to templates which triggers a recompile.  Then simply refresh the page to see the changes.  Try it out by making a change to the <a href="#code/app/views/index.scala.html" class="shortcut">index template</a>, saving the file, and then refreshing the <a href="http://localhost:9000/" target="_blank">index page</a> in your browser.
-        <!-- todo: Learn more -->
+    <pre><code>@routes.Assets.at("images/favicon.png")</code></pre>
+    This provides a type-safe way to specify URLs in an application. If the URL to a file changes, then automatically,
+    the new value will be used throughout all of the URL references. You can use the reverse router anywhere in your
+    code, like redirects in controllers.<br/>
+    Like controllers (and all source code in Play) you can make changes to templates which triggers a recompile. Then
+    simply refresh the page to see the changes. Try it out by making a change to the <a
+        href="#code/app/views/index.scala.html" class="shortcut">index template</a>, saving the file, and then
+    refreshing the <a href="http://localhost:9000/" target="_blank">index page</a> in your browser.
+    <!-- todo: Learn more -->
     </p>
 </div>
 
@@ -222,11 +348,14 @@ object InitialData {
     <h2> Static Assets</h2>
 
     <p>
-        This application has a route to handle loading static assets from the <a href="#code/public" class="shortcut">public</a> directory:
-        <pre><code>GET /assets/*file controllers.Assets.at(path="/public", file)</code></pre>
-        A request to <a href="http://localhost:9000/assets/images/favicon.png" target="_blank">http://localhost:9000/assets/images/favicon.png</a> will use this route to find the <a href="#code/public/images/favicon.png" class="shortcut">favicon.png</a> file in the <strong>public/images</strong> directory.<br/>
-        You can put any static assets into the public directory and have them accessible in this way.
-        <!-- todo: Learn more -->
+        This application has a route to handle loading static assets from the <a href="#code/public" class="shortcut">public</a>
+        directory:
+    <pre><code>GET /assets/*file controllers.Assets.at(path="/public", file)</code></pre>
+    A request to <a href="http://localhost:9000/assets/images/favicon.png" target="_blank">http://localhost:9000/assets/images/favicon.png</a>
+    will use this route to find the <a href="#code/public/images/favicon.png" class="shortcut">favicon.png</a> file in
+    the <strong>public/images</strong> directory.<br/>
+    You can put any static assets into the public directory and have them accessible in this way.
+    <!-- todo: Learn more -->
     </p>
 </div>
 
@@ -234,14 +363,21 @@ object InitialData {
     <h2> Asset Compiler</h2>
 
     <p>
-        Modern web applications often use compilers to generate static assets for the browser.  Play has a built-in asset compiler which can automatically syntax check &amp; minify JavaScript, compile CoffeeScript to JavaScript, and compile LESS to CSS.  You can also plug in other compilers into the Play's asset compiler.<br/>
-        This application contains two example uses of the asset compiler.  The <a href="#code/app/assets/javascripts/index.js" class="shortcut">index.js</a> file will automatically be syntax checked and minified.  The minified version is can be referenced in a template with:
+        Modern web applications often use compilers to generate static assets for the browser. Play has a built-in asset
+        compiler which can automatically syntax check &amp; minify JavaScript, compile CoffeeScript to JavaScript, and
+        compile LESS to CSS. You can also plug in other compilers into the Play's asset compiler.<br/>
+        This application contains two example uses of the asset compiler. The <a
+            href="#code/app/assets/javascripts/index.js" class="shortcut">index.js</a> file will automatically be syntax
+        checked and minified. The minified version is can be referenced in a template with:
         <pre><code>&lt;script type='text/javascript'
-src='@routes.Assets.at("javascripts/index.min.js")'&gt;
-&lt;/script&gt;</code></pre>
-        You can also put CoffeeScript files with a <strong>.coffee</strong> extension in the <a href="#code/app/assets/javascripts" class="shortcut">app/assets/javascripts</a> directory to have them automatically compiled and minified.<br/>
-        The <a href="#code/app/assets/stylesheets/index.less" class="shortcut">index.less</a> file will be compiled into both a <strong>index.css</strong> and a <strong>index.min.css</strong> file.
-        <!-- todo: Learn more -->
+            src='@routes.Assets.at("javascripts/index.min.js")'&gt;
+            &lt;/script&gt;</code></pre>
+    You can also put CoffeeScript files with a <strong>.coffee</strong> extension in the <a
+        href="#code/app/assets/javascripts" class="shortcut">app/assets/javascripts</a> directory to have them
+    automatically compiled and minified.<br/>
+    The <a href="#code/app/assets/stylesheets/index.less" class="shortcut">index.less</a> file will be compiled into
+    both a <strong>index.css</strong> and a <strong>index.min.css</strong> file.
+    <!-- todo: Learn more -->
     </p>
 </div>
 
@@ -249,8 +385,17 @@ src='@routes.Assets.at("javascripts/index.min.js")'&gt;
     <h2> Test the App</h2>
 
     <p>
-        This application includes a number of tests which are automatically run after each successful compile.  You can see the test results in the <a href="#test" class="shortcut">Test plugin</a>.  Due to changes that you may have made to your application source code, some of the tests might now be failing.  The source for the tests is located in the <a href="#code/test" class="shortcut">test</a> directory and contains both Java and Scala tests.  The <a href="#code/test/MainControllerTest.java" class="shortcut">test/MainControllerTest.java</a> Java class contains a number of unit and functional tests for the <strong>MainController</strong>.  The <a href="#code/test/IntegrationTest.java" class="shortcut">IntegrationTest.java</a> file contains an test which uses Solenium to test the actual UI in a browser.  The default testing framework for Java in Play is JUnit, but you can plug any testing framework in.<br/>
-        The <a href="#code/test/MessageControllerSpec.scala" class="shortcut">MessageControllerSpec.scala</a> file contains a functional test for the <strong>MessageController</strong>.<br/>
+        This application includes a number of tests which are automatically run after each successful compile. You can
+        see the test results in the <a href="#test" class="shortcut">Test plugin</a>. Due to changes that you may have
+        made to your application source code, some of the tests might now be failing. The source for the tests is
+        located in the <a href="#code/test" class="shortcut">test</a> directory and contains both Java and Scala tests.
+        The <a href="#code/test/MainControllerTest.java" class="shortcut">test/MainControllerTest.java</a> Java class
+        contains a number of unit and functional tests for the <strong>MainController</strong>. The <a
+            href="#code/test/IntegrationTest.java" class="shortcut">IntegrationTest.java</a> file contains an test which
+        uses Solenium to test the actual UI in a browser. The default testing framework for Java in Play is JUnit, but
+        you can plug any testing framework in.<br/>
+        The <a href="#code/test/MessageControllerSpec.scala" class="shortcut">MessageControllerSpec.scala</a> file
+        contains a functional test for the <strong>MessageController</strong>.<br/>
         If you modify a test and save the changes, then the tests will automatically be re-run.
         <!-- todo: Learn more -->
     </p>
@@ -260,9 +405,15 @@ src='@routes.Assets.at("javascripts/index.min.js")'&gt;
     <h2> SBT Build</h2>
 
     <p>
-        SBT is the build system underneath Play applications.  It is responsible for resolving dependencies, compiling the project, running the tests, etc.  The primary build definition file is the <a href="#code/build.sbt" class="shortcut">build.sbt</a> file.  In that file you will see a comma-seperated list of dependencies which can be modified to suit your needs.  Play includes a number of libraries which can selectively be turned on/off.  For instance if you want to use JPA with Play, uncomment the <strong>javaJpa</strong> dependency.  You can also add your own dependencies in the SBT form:
-        <pre><code>"group" % "artifact" % "version"</code></pre>
-        <!-- todo: Learn more -->
+        SBT is the build system underneath Play applications. It is responsible for resolving dependencies, compiling
+        the project, running the tests, etc. The primary build definition file is the <a href="#code/build.sbt"
+                                                                                         class="shortcut">build.sbt</a>
+        file. In that file you will see a comma-seperated list of dependencies which can be modified to suit your needs.
+        Play includes a number of libraries which can selectively be turned on/off. For instance if you want to use JPA
+        with Play, uncomment the <strong>javaJpa</strong> dependency. You can also add your own dependencies in the SBT
+        form:
+    <pre><code>"group" % "artifact" % "version"</code></pre>
+    <!-- todo: Learn more -->
     </p>
 </div>
 
@@ -270,11 +421,21 @@ src='@routes.Assets.at("javascripts/index.min.js")'&gt;
     <h2>Typesafe Console</h2>
 
     <p>
-        The Typesafe Console visualizes the internals of Play Framework and Akka applications in real-time.  To enable the Console you will need a free Typesafe.com account since the Console is licensed under the <a href="http://content.typesafe.com/assets/legal/TypesafeSubscriptionAgreement.pdf" target="_blank">Typesafe Subscription Agreement</a> which allows it to be used at development time for free.  Production use requires a <a href="http://typesafe.com/how/subscription" target="_blank">Typesafe Subscription</a>.
+        The Typesafe Console visualizes the internals of Play Framework and Akka applications in real-time. To enable
+        the Console you will need a free Typesafe.com account since the Console is licensed under the <a
+            href="http://content.typesafe.com/assets/legal/TypesafeSubscriptionAgreement.pdf" target="_blank">Typesafe
+        Subscription Agreement</a> which allows it to be used at development time for free. Production use requires a <a
+            href="http://typesafe.com/how/subscription" target="_blank">Typesafe Subscription</a>.
     </p>
 
     <p>
-        To enable the Console, in <a href="#run" class="shortcut">Run</a> click <strong>Login to Typesafe.com</strong> and login.  If you don't have an account, then <a href="https://typesafe.com/account/register" target="_blank">sign up</a> and then login inside Activator (click the person icon in the top-right to open the login form).  Once logged in, click the <strong>Restart with Console</strong> button to start the selected application with Console support.  There will then be a link to the Console UI.  Open that link to enter the Typesafe Console.  <a href="http://typesafe.com/platform/runtime/console" target="_blank">Learn more about the Typesafe Console</a>.
+        To enable the Console, in <a href="#run" class="shortcut">Run</a> click <strong>Login to Typesafe.com</strong>
+        and login. If you don't have an account, then <a href="https://typesafe.com/account/register" target="_blank">sign
+        up</a> and then login inside Activator (click the person icon in the top-right to open the login form). Once
+        logged in, click the <strong>Restart with Console</strong> button to start the selected application with Console
+        support. There will then be a link to the Console UI. Open that link to enter the Typesafe Console. <a
+            href="http://typesafe.com/platform/runtime/console" target="_blank">Learn more about the Typesafe
+        Console</a>.
     </p>
 
 </div>
@@ -283,9 +444,13 @@ src='@routes.Assets.at("javascripts/index.min.js")'&gt;
     <h2> Further Learning</h2>
 
     <p>
-        The <a href="http://www.playframework.com/documentation" target="_blank">Play Documentation</a> contains much more exhaustive details and also covers a number of other topics which haven't been addressed in this tutorial.<br/>
-        <a href="http://stackoverflow.com" target="_blank">StackOverflow</a> is a great place ask questions about Play.<br/>
-        <a href="http://groups.google.com/group/play-framework" target="_blank">The play-framework</a> Google Group is a great place to discuss Play.<br/>
+        The <a href="http://www.playframework.com/documentation" target="_blank">Play Documentation</a> contains much
+        more exhaustive details and also covers a number of other topics which haven't been addressed in this
+        tutorial.<br/>
+        <a href="http://stackoverflow.com" target="_blank">StackOverflow</a> is a great place ask questions about
+        Play.<br/>
+        <a href="http://groups.google.com/group/play-framework" target="_blank">The play-framework</a> Google Group is a
+        great place to discuss Play.<br/>
     </p>
 </div>
 

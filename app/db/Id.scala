@@ -26,7 +26,7 @@ trait BaseId extends Any {
  * @tparam A type of table
  * @author Krzysztof Romanowski, Jerzy Müller
  */
-abstract class IdMapping[I <: BaseId, A <: Id[I]](table: IdTable[I, A]) {
+abstract class IdCompanion[I <: BaseId, A <: Id[I]](table: IdTable[I, A]) {
 
   /** Ordering for ids - it is normal simple ordering on inner integers ascending. */
   implicit lazy val ordering: Ordering[I] = Ordering.by[I, Long](_.id)

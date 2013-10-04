@@ -175,4 +175,16 @@ trait BaseIdService[I <: BaseId, A <: Id[I]] {
       table.insertOne(elem)
     )
   }
+
+  /**
+   * Saves multiple elements.
+   *
+   * @param elems elements to save
+   * @param session implicit database session
+   * @return Sequence of ids
+   */
+  def saveAll(elems: Seq[A])(implicit session: Session): Seq[I] = session.withTransaction {
+    elems.map(elem => this.save(elem))
+  }
+
 }
