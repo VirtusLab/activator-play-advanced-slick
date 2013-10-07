@@ -26,6 +26,11 @@ trait BaseId extends Any {
  */
 abstract class IdCompanion[I <: BaseId] extends PlayImplicits[I] with SlickImplicits[I] {
 
+  /**
+   * Factory method for I instance creation.
+   * @param id long from which I instance is created
+   * @return I instance
+   */
   def apply(id: Long): I
 
   /** Ordering for ids - it is normal simple ordering on inner integers ascending. */
@@ -45,10 +50,8 @@ object IdCompanion {
 trait SlickImplicits[I <: BaseId] {
   self: IdCompanion.Applicable[I] =>
 
-  /**
-   * @return Mapping for id.
-   */
-  implicit final val mapping: BaseTypeMapper[I] with NumericTypeMapper =
+  /** Mapping for id */
+  implicit final val mapping: IdTable.NTM[I] =
     new MappedTypeMapper[I, Long] with BaseTypeMapper[I] with NumericTypeMapper {
       def map(t: I): Long = t.id
 
@@ -77,9 +80,7 @@ trait PlayImplicits[I <: BaseId] {
   implicit val toPathBindable: QueryStringBindable[I] =
     QueryStringBindable.bindableLong.transform(apply, _.id)
 
-  /**
-   * @return Form formatter for I.
-   */
+  /** Form formatter for I */
   implicit lazy val idMappingFormatter: Formatter[I] = new Formatter[I] {
 
     override val format = Some(("format.numeric", Nil))
@@ -111,13 +112,15 @@ trait WithId[I] {
  *
  * @param schemaName name of schema (optional)
  * @param tableName name of the table
+ * @param mapping mapping for id of this table
+ * @tparam I type of id
  * @tparam A type of table
  * @author Krzysztof Romanowski, Jerzy Müller
  */
 abstract class IdTable[I <: BaseId, A <: WithId[I]](schemaName: Option[String], tableName: String)
                                                    (implicit val mapping: IdTable.NTM[I])
-    extends BaseTable[A](schemaName, tableName)
-    with SavingMethods[I, A, IdTable[I, A]] {
+  extends BaseTable[A](schemaName, tableName)
+  with SavingMethods[I, A, IdTable[I, A]] {
 
   /**
    * Auxiliary constructor without schema name.
@@ -125,9 +128,7 @@ abstract class IdTable[I <: BaseId, A <: WithId[I]](schemaName: Option[String], 
    */
   def this(tableName: String)(implicit mapping: IdTable.NTM[I]) = this(None, tableName)
 
-  /**
-   * @return id column representation of this table
-   */
+  /** @return id column representation of this table */
   final def id = column[I]("id", O.PrimaryKey, O.AutoInc)
 
   /**

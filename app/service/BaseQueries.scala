@@ -3,7 +3,6 @@ package service
 import java.sql.SQLException
 import play.api.db.slick.Config.driver.simple._
 import slick.session.Session
-import scala.slick.lifted.{ NumericTypeMapper, BaseTypeMapper }
 import db.{WithId, IdTable, BaseId}
 
 /**
@@ -15,7 +14,7 @@ import db.{WithId, IdTable, BaseId}
 trait BaseQueries[A] {
 
   /** @return table to operate on */
-  def table: Table[A]
+  protected def table: Table[A]
 
   /** query that returns all */
   protected lazy val allQuery = Query(table)
@@ -31,13 +30,13 @@ trait BaseQueries[A] {
 trait BaseIdQueries[I <: BaseId, A <: WithId[I]] {
 
   /** @return table to operate on; it must be an IdTable */
-  def table: Table[A] with IdTable[I, A]
+  protected def table: Table[A] with IdTable[I, A]
 
   /** query that returns all */
   protected lazy val allQuery = Query(table)
 
   /** @return type mapper for I, required for querying */
-  implicit def mapping: BaseTypeMapper[I] with NumericTypeMapper = table.mapping
+  protected implicit def mapping: IdTable.NTM[I] = table.mapping
 
   /** Query element by id, parametrized version. */
   protected lazy val byIdQuery = for {
@@ -53,7 +52,6 @@ trait BaseIdQueries[I <: BaseId, A <: WithId[I]] {
 
   /** Query by multiple ids. */
   protected def byIdsQuery(ids: Seq[I]) = allQuery.filter(_.id inSet ids)
-
 }
 
 /**
