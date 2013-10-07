@@ -4,7 +4,7 @@ import java.sql.SQLException
 import play.api.db.slick.Config.driver.simple._
 import slick.session.Session
 import scala.slick.lifted.{ NumericTypeMapper, BaseTypeMapper }
-import db.{Id, IdTable, BaseId}
+import db.{WithId, IdTable, BaseId}
 
 /**
  * Base class for all queries.
@@ -28,7 +28,7 @@ trait BaseQueries[A] {
  * @tparam A type of element that is queried
  * @author Jerzy Müller
  */
-trait BaseIdQueries[I <: BaseId, A <: Id[I]] {
+trait BaseIdQueries[I <: BaseId, A <: WithId[I]] {
 
   /** @return table to operate on; it must be an IdTable */
   def table: Table[A] with IdTable[I, A]
@@ -107,7 +107,7 @@ trait BaseService[A] {
  * @tparam A type of entity
  * @author Jerzy Müller
  */
-trait BaseIdService[I <: BaseId, A <: Id[I]] {
+trait BaseIdService[I <: BaseId, A <: WithId[I]] {
   self: BaseIdQueries[I, A] =>
 
   /**

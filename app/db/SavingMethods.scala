@@ -23,7 +23,7 @@ object SavingMethods {
 
 }
 
-trait SavingMethods[I <: BaseId, A <: Id[I], T <: IdTable[I, A]] {
+trait SavingMethods[I <: BaseId, A <: WithId[I], T <: IdTable[I, A]] {
   self: T =>
 
   private def Error(value: A) = new RuntimeException(s"Unapply in saveBase returned None. Value: $value")

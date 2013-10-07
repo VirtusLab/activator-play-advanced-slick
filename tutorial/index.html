@@ -113,20 +113,20 @@
         your application. Example entity created with this library can be shown <a href="#code/app/model/User.scala" class="shortcut">here.</a>
     </p>
 
-    <p>Entity declaration contains of four parts:
+    <p>Entity declaration contains of four parts:</p>
     <ul>
         <li>Case class for your type-safe id. It has to <strong>extends AnyVal with BaseId</strong> and contain id
             field of type <strong>Long</strong>.
         </li>
-        <li>Companion object for your id. It have to extend <strong>IdCompanion</strong> which accepts table for your
-            entity (see below). This step provides you with implicits needed in slick queries and Play! mappings.
+        <li>Companion object for your id. It have to extend <strong>IdCompanion[YourEntityId]</strong>. This step provides
+            you with implicits needed in slick queries and Play! mappings.
         </li>
-        <li>Your domain model entity. It has to <strong>extend Id[YourEntityId]</strong>.</li>
+        <li>Your domain model entity. It has to <strong>extend WithId[YourEntityId]</strong>.</li>
         <li>Table definition for your entity. It <strong>extends IdTable[YourEntityId, YourEntity]</strong>, which
-            accepts table name (and optionally schema name) and <strong>YourEntityId.unapply</strong> function.
+            accepts table name (and optionally schema name).
         </li>
     </ul>
-    </p>
+
 
 </div>
 
@@ -155,7 +155,8 @@
     </p>
 
     <p>
-        In queries for comments (<a href="#code/app/service/CommentsService.scala" class="shortcut">CommentsService</a>) we can now create query joining on type-safe userId:
+        In queries for comments (<a href="#code/app/service/CommentsService.scala" class="shortcut">CommentsService</a>)
+        we can now create query joining on type-safe userId:
     </p>
 
     <pre><code>

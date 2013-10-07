@@ -1,18 +1,21 @@
 package model
 
 import org.joda.time.DateTime
-import db.{Id, IdTable, IdCompanion, BaseId}
+import db.{WithId, IdTable, IdCompanion, BaseId}
 import scala.slick.session.Session
 
 case class CommentId(id: Long) extends AnyVal with BaseId
 
-object CommentId extends IdCompanion(Comments)
+object CommentId extends IdCompanion[CommentId]
 
 
-case class Comment(id: Option[CommentId], text: String, authorId: UserId, date: DateTime) extends Id[CommentId]
+case class Comment(id: Option[CommentId],
+                   text: String,
+                   authorId: UserId,
+                   date: DateTime) extends WithId[CommentId]
 
 
-object Comments extends IdTable[CommentId, Comment]("comments", CommentId.apply) {
+object Comments extends IdTable[CommentId, Comment]("comments") {
 
   def text = column[String]("text")
 
@@ -25,9 +28,9 @@ object Comments extends IdTable[CommentId, Comment]("comments", CommentId.apply)
 
   def base = text ~ authorId ~ date
 
-  def * = id.? ~: base <> (Comment.apply _, Comment.unapply _)
+  override def * = id.? ~: base <> (Comment.apply _, Comment.unapply _)
 
-  def insertOne(elem: Comment)(implicit session: Session): CommentId =
+  override def insertOne(elem: Comment)(implicit session: Session): CommentId =
     saveBase(base, Comment.unapply _)(elem)
 
 }

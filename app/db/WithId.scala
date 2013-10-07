@@ -1,10 +1,9 @@
 package db
 
-import play.api.db.slick.Config.driver.simple._
-import scala.slick.lifted.{MappedTypeMapper, BaseTypeMapper, NumericTypeMapper}
-import play.api.mvc.{ QueryStringBindable, PathBindable }
 import play.api.data.format.{ Formats, Formatter }
-import play.api.i18n.Messages
+import play.api.db.slick.Config.driver.simple._
+import play.api.mvc.{ QueryStringBindable, PathBindable }
+import scala.slick.lifted.{ MappedTypeMapper, BaseTypeMapper, NumericTypeMapper }
 import scala.slick.session.Session
 
 /**
@@ -21,18 +20,15 @@ trait BaseId extends Any {
  * Base class for companion objects for id classes.
  * Adding this will allow you not to import mapping from your table class every time you need it.
  *
- * @param table table for this id
  * @tparam I type of Id
- * @tparam A type of table
  * @author Krzysztof Romanowski, Jerzy Müller
  */
-abstract class IdCompanion[I <: BaseId, A <: Id[I]](table: IdTable[I, A]) {
+abstract class IdCompanion[I <: BaseId] {
+
+  def apply(id: Long): I
 
   /** Ordering for ids - it is normal simple ordering on inner integers ascending. */
   implicit lazy val ordering: Ordering[I] = Ordering.by[I, Long](_.id)
-
-  /** Type mapper for tables. */
-  implicit lazy val mapping: BaseTypeMapper[I] with NumericTypeMapper = table.mapping
 
   /**
    * Type mapper for route files.
@@ -40,14 +36,23 @@ abstract class IdCompanion[I <: BaseId, A <: Id[I]](table: IdTable[I, A]) {
    * @return path bindable for I
    */
   implicit def pathBindable(implicit longBinder: PathBindable[Long]): PathBindable[I] =
-    longBinder.transform(table.idCreateFunc, _.id)
+    longBinder.transform(apply, _.id)
 
   /** Implicit for mapping id to routes params for play */
   implicit val toPathBindable: QueryStringBindable[I] =
-    QueryStringBindable.bindableLong.transform(table.idCreateFunc, _.id)
+    QueryStringBindable.bindableLong.transform(apply, _.id)
 
   /**
-   * table name should be placed in messages under entity.tableName
+   * @return Mapping for id.
+   */
+  implicit final val mapping: BaseTypeMapper[I] with NumericTypeMapper =
+    new MappedTypeMapper[I, Long] with BaseTypeMapper[I] with NumericTypeMapper {
+      def map(t: I): Long = t.id
+
+      def comap(u: Long): I = IdCompanion.this.apply(u)
+    }
+
+  /**
    * @return Form formatter for I.
    */
   implicit lazy val idMappingFormatter: Formatter[I] = new Formatter[I] {
@@ -55,15 +60,12 @@ abstract class IdCompanion[I <: BaseId, A <: Id[I]](table: IdTable[I, A]) {
     override val format = Some(("format.numeric", Nil))
 
     override def bind(key: String, data: Map[String, String]) =
-      Formats.longFormat.bind(key, data).right.map(table.idCreateFunc).left.map(
-        errors =>
-        {
-          if (data.get(key).forall(_.isEmpty))
-            errors.map(_.copy(message = "id.empty", args = Seq(Messages(s"entity.${table.tableName}"))))
-          else
-            errors.map(_.copy(message = "id.invalid", args = Seq(Messages(s"entity.${table.tableName}"))))
-        }
-      )
+      Formats.longFormat.bind(key, data).right.map(apply).left.map {
+        case errors if data.get(key).forall(_.isEmpty) =>
+          errors.map(_.copy(message = "id.empty"))
+        case errors =>
+          errors.map(_.copy(message = "id.invalid"))
+      }
 
     override def unbind(key: String, value: I): Map[String, String] =
       Map(key -> value.id.toString)
@@ -75,7 +77,7 @@ abstract class IdCompanion[I <: BaseId, A <: Id[I]](table: IdTable[I, A]) {
  *
  * @author Krzysztof Romanowski
  */
-trait Id[I] {
+trait WithId[I] {
   /**
    * @return id of entity (optional, entities does not have ids before save)
    */
@@ -87,11 +89,10 @@ trait Id[I] {
  *
  * @param schemaName name of schema (optional)
  * @param tableName name of the table
- * @param idCreateFunc function from int to I (id type of this table)
  * @tparam A type of table
  * @author Krzysztof Romanowski, Jerzy Müller
  */
-abstract class IdTable[I <: BaseId, A <: Id[I]](schemaName: Option[String], tableName: String, val idCreateFunc: Long => I)
+abstract class IdTable[I <: BaseId, A <: WithId[I]](schemaName: Option[String], tableName: String)(implicit val mapping: IdTable.NTM[I])
   extends BaseTable[A](schemaName, tableName)
   with SavingMethods[I, A, IdTable[I, A]] {
 
@@ -99,22 +100,12 @@ abstract class IdTable[I <: BaseId, A <: Id[I]](schemaName: Option[String], tabl
    * Auxiliary constructor without schema name.
    * @param tableName name of table
    */
-  def this(tableName: String, idCreateFunc: Long => I) = this(None, tableName, idCreateFunc)
+  def this(tableName: String)(implicit mapping: IdTable.NTM[I]) = this(None, tableName)
 
   /**
    * @return id column representation of this table
    */
   final def id = column[I]("id", O.PrimaryKey, O.AutoInc)
-
-  /**
-   * @return Mapping for id.
-   */
-  implicit final def mapping: BaseTypeMapper[I] with NumericTypeMapper =
-    new MappedTypeMapper[I, Long] with BaseTypeMapper[I] with NumericTypeMapper {
-      def map(t: I): Long = t.id
-
-      def comap(u: Long): I = idCreateFunc(u)
-    }
 
   /**
    * Method for inserting one element, to be implemented by subtypes.
@@ -124,6 +115,11 @@ abstract class IdTable[I <: BaseId, A <: Id[I]](schemaName: Option[String], tabl
    * @return
    */
   def insertOne(elem: A)(implicit session: Session): I
+}
+
+object IdTable {
+  /** Short for Numeric type mapper */
+  type NTM[A] = BaseTypeMapper[A] with NumericTypeMapper
 }
 
 /**

@@ -18,7 +18,7 @@ Defining entities
 ```scala
 package model
 
-import db.{ IdTable, Id, IdCompanion, BaseId }
+import db.{ IdTable, WithId, IdCompanion, BaseId }
 import scala.slick.session.Session
 
 /** Id class for type-safe joins and queries. */
@@ -27,7 +27,7 @@ case class UserId(id: Long) extends AnyVal with BaseId
 /** Companion object for id class, extends IdMapping
   * and brings all required implicits to scope when needed.
   */
-object UserId extends IdCompanion(Users)
+object UserId extends IdCompanion[UserId]
 
 /** User entity.
   *
@@ -39,10 +39,10 @@ object UserId extends IdCompanion(Users)
 case class User(id: Option[UserId],
                 email: String,
                 firstName: String,
-                lastName: String) extends Id[UserId]
+                lastName: String) extends WithId[UserId]
 
 /** Table definition for users. */
-object Users extends IdTable[UserId, User]("users", UserId.apply) {
+object Users extends IdTable[UserId, User]("users") {
 
   def email = column[String]("email", O.NotNull)
 
@@ -52,9 +52,9 @@ object Users extends IdTable[UserId, User]("users", UserId.apply) {
 
   def base = email ~ firstName ~ lastName
 
-  def * = id.? ~: base <> (User.apply _, User.unapply _)
+  override def * = id.? ~: base <> (User.apply _, User.unapply _)
 
-  def insertOne(elem: User)(implicit session: Session): UserId =
+  override def insertOne(elem: User)(implicit session: Session): UserId =
     saveBase(base, User.unapply _)(elem)
 }
 ```
