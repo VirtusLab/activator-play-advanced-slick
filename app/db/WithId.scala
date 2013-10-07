@@ -5,6 +5,7 @@ import play.api.db.slick.Config.driver.simple._
 import play.api.mvc.{ QueryStringBindable, PathBindable }
 import scala.slick.lifted.{ MappedTypeMapper, BaseTypeMapper, NumericTypeMapper }
 import scala.slick.session.Session
+import scala.language.reflectiveCalls
 
 /**
  * Base trait for all ids in system.
@@ -23,12 +24,46 @@ trait BaseId extends Any {
  * @tparam I type of Id
  * @author Krzysztof Romanowski, Jerzy Müller
  */
-abstract class IdCompanion[I <: BaseId] {
+abstract class IdCompanion[I <: BaseId] extends PlayImplicits[I] with SlickImplicits[I] {
 
   def apply(id: Long): I
 
   /** Ordering for ids - it is normal simple ordering on inner integers ascending. */
   implicit lazy val ordering: Ordering[I] = Ordering.by[I, Long](_.id)
+}
+
+object IdCompanion {
+  type Applicable[I <: BaseId] = { def apply(id: Long): I }
+}
+
+/**
+ * Implicits required by Slick.
+ *
+ * @tparam I type of Id
+ * @author Krzysztof Romanowski, Jerzy Müller
+ */
+trait SlickImplicits[I <: BaseId] {
+  self: IdCompanion.Applicable[I] =>
+
+  /**
+   * @return Mapping for id.
+   */
+  implicit final val mapping: BaseTypeMapper[I] with NumericTypeMapper =
+    new MappedTypeMapper[I, Long] with BaseTypeMapper[I] with NumericTypeMapper {
+      def map(t: I): Long = t.id
+
+      def comap(u: Long): I = SlickImplicits.this.apply(u)
+    }
+}
+
+/**
+ * Implicits required by Play.
+ *
+ * @tparam I type of Id
+ * @author Krzysztof Romanowski, Jerzy Müller
+ */
+trait PlayImplicits[I <: BaseId] {
+  self: IdCompanion.Applicable[I] =>
 
   /**
    * Type mapper for route files.
@@ -43,16 +78,6 @@ abstract class IdCompanion[I <: BaseId] {
     QueryStringBindable.bindableLong.transform(apply, _.id)
 
   /**
-   * @return Mapping for id.
-   */
-  implicit final val mapping: BaseTypeMapper[I] with NumericTypeMapper =
-    new MappedTypeMapper[I, Long] with BaseTypeMapper[I] with NumericTypeMapper {
-      def map(t: I): Long = t.id
-
-      def comap(u: Long): I = IdCompanion.this.apply(u)
-    }
-
-  /**
    * @return Form formatter for I.
    */
   implicit lazy val idMappingFormatter: Formatter[I] = new Formatter[I] {
@@ -61,10 +86,8 @@ abstract class IdCompanion[I <: BaseId] {
 
     override def bind(key: String, data: Map[String, String]) =
       Formats.longFormat.bind(key, data).right.map(apply).left.map {
-        case errors if data.get(key).forall(_.isEmpty) =>
-          errors.map(_.copy(message = "id.empty"))
-        case errors =>
-          errors.map(_.copy(message = "id.invalid"))
+        case errors if data.get(key).forall(_.isEmpty) => errors.map(_.copy(message = "id.empty"))
+        case errors => errors.map(_.copy(message = "id.invalid"))
       }
 
     override def unbind(key: String, value: I): Map[String, String] =
@@ -78,9 +101,8 @@ abstract class IdCompanion[I <: BaseId] {
  * @author Krzysztof Romanowski
  */
 trait WithId[I] {
-  /**
-   * @return id of entity (optional, entities does not have ids before save)
-   */
+
+  /** @return id of entity (optional, entities does not have ids before save) */
   def id: Option[I]
 }
 
@@ -92,9 +114,10 @@ trait WithId[I] {
  * @tparam A type of table
  * @author Krzysztof Romanowski, Jerzy Müller
  */
-abstract class IdTable[I <: BaseId, A <: WithId[I]](schemaName: Option[String], tableName: String)(implicit val mapping: IdTable.NTM[I])
-  extends BaseTable[A](schemaName, tableName)
-  with SavingMethods[I, A, IdTable[I, A]] {
+abstract class IdTable[I <: BaseId, A <: WithId[I]](schemaName: Option[String], tableName: String)
+                                                   (implicit val mapping: IdTable.NTM[I])
+    extends BaseTable[A](schemaName, tableName)
+    with SavingMethods[I, A, IdTable[I, A]] {
 
   /**
    * Auxiliary constructor without schema name.
@@ -131,8 +154,8 @@ object IdTable {
  * @author Krzysztof Romanowski, Jerzy Müller
  */
 abstract class BaseTable[A](schemaName: Option[String], tableName: String)
-  extends Table[A](schemaName, tableName)
-  with CustomTypeMappers {
+    extends Table[A](schemaName, tableName)
+    with CustomTypeMappers {
 
   /**
    * Auxiliary constructor without schema name.
