@@ -6,8 +6,8 @@ Slick (the Scala Language-Integrated Connection Kit) is a framework for type saf
 Authors
 =======
 
-* Jerzy Müller
-* Krzysztof Romanowski
+* [Jerzy Müller](https://github.com/Kwestor)
+* [Krzysztof Romanowski](https://github.com/romanowski)
 
 Examples
 ========
