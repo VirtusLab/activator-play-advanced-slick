@@ -5,7 +5,6 @@ import play.api.db.slick.Config.driver.simple._
 import play.api.mvc.{ QueryStringBindable, PathBindable }
 import scala.slick.lifted.{ MappedTypeMapper, BaseTypeMapper, NumericTypeMapper }
 import scala.slick.session.Session
-import scala.language.reflectiveCalls
 
 /**
  * Base trait for all ids in system.
@@ -24,7 +23,17 @@ trait BaseId extends Any {
  * @tparam I type of Id
  * @author Krzysztof Romanowski, Jerzy Müller
  */
-abstract class IdCompanion[I <: BaseId] extends PlayImplicits[I] with SlickImplicits[I] {
+abstract class IdCompanion[I <: BaseId]
+  extends PlayImplicits[I]
+  with SlickImplicits[I]
+  with Applicable[I] {
+
+  /** Ordering for ids - it is normal simple ordering on inner longs ascending */
+  implicit lazy val ordering: Ordering[I] = Ordering.by[I, Long](_.id)
+}
+
+/** Marker trait */
+protected[db] trait Applicable[I <: BaseId] {
 
   /**
    * Factory method for I instance creation.
@@ -32,13 +41,6 @@ abstract class IdCompanion[I <: BaseId] extends PlayImplicits[I] with SlickImpli
    * @return I instance
    */
   def apply(id: Long): I
-
-  /** Ordering for ids - it is normal simple ordering on inner integers ascending. */
-  implicit lazy val ordering: Ordering[I] = Ordering.by[I, Long](_.id)
-}
-
-object IdCompanion {
-  type Applicable[I <: BaseId] = { def apply(id: Long): I }
 }
 
 /**
@@ -47,8 +49,8 @@ object IdCompanion {
  * @tparam I type of Id
  * @author Krzysztof Romanowski, Jerzy Müller
  */
-trait SlickImplicits[I <: BaseId] {
-  self: IdCompanion.Applicable[I] =>
+protected[db] trait SlickImplicits[I <: BaseId] {
+  self: Applicable[I] =>
 
   /** Mapping for id */
   implicit final val mapping: IdTable.NTM[I] =
@@ -65,8 +67,8 @@ trait SlickImplicits[I <: BaseId] {
  * @tparam I type of Id
  * @author Krzysztof Romanowski, Jerzy Müller
  */
-trait PlayImplicits[I <: BaseId] {
-  self: IdCompanion.Applicable[I] =>
+protected[db] trait PlayImplicits[I <: BaseId] {
+  self: Applicable[I] =>
 
   /**
    * Type mapper for route files.
@@ -141,6 +143,7 @@ abstract class IdTable[I <: BaseId, A <: WithId[I]](schemaName: Option[String], 
   def insertOne(elem: A)(implicit session: Session): I
 }
 
+// TODO - change scope after package rename
 object IdTable {
   /** Short for Numeric type mapper */
   type NTM[A] = BaseTypeMapper[A] with NumericTypeMapper

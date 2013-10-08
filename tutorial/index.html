@@ -53,14 +53,14 @@
         Play includes a function called <a
             href="http://www.playframework.com/documentation/2.2.x/Evolutions">evolutions</a> that allows the management
         of database schema changes. To use evolutions, create an evolutions folder for the default database as
-        <strong>conf/evolutions/default</strong>
+        <code>conf/evolutions/default</code>
         then create .sql scripts that will put the database into the appropriate state. Evolutions also has the ability
         to revert the database to a previous version.
 
         This template uses play-slick DDL plugin that creates 1.sql file for you automatically for all tables defined in
         "model" package. To disable this feature or change package see <a href="#code/conf/application.conf"
                                                                           class="shortcut">application.conf</a> and change
-        <strong>slick.default="model.*"</strong> parameter.
+        <code>slick.default="model.*"</code> parameter.
 
         In this example, this plugin will create a file called conf/evolutions/default/1.sql with the following content:
     </p>
@@ -104,7 +104,7 @@
 
     <p>
         In order to create a set of models in play that will use Slick to access the database, you need to create the
-        models. The Slick site at <a href="http://slick.typesafe.com">slick.typesafe.com</a>
+        models. The Slick site at <a href="http://slick.typesafe.com" target="_blank">slick.typesafe.com</a>
         has an excellent set of documentation.
     </p>
 
@@ -115,14 +115,14 @@
 
     <p>Entity declaration contains of four parts:</p>
     <ul>
-        <li>Case class for your type-safe id. It has to <strong>extends AnyVal with BaseId</strong> and contain id
-            field of type <strong>Long</strong>.
+        <li>Case class for your type-safe id. It has to <code>extends AnyVal with BaseId</code> and contain id
+            field of type <code>Long</code>.
         </li>
-        <li>Companion object for your id. It have to extend <strong>IdCompanion[YourEntityId]</strong>. This step provides
+        <li>Companion object for your id. It have to extend <code>IdCompanion[YourEntityId]</code>. This step provides
             you with implicits needed in slick queries and Play! mappings.
         </li>
-        <li>Your domain model entity. It has to <strong>extend WithId[YourEntityId]</strong>.</li>
-        <li>Table definition for your entity. It <strong>extends IdTable[YourEntityId, YourEntity]</strong>, which
+        <li>Your domain model entity. It has to <code>extend WithId[YourEntityId]</code>.</li>
+        <li>Table definition for your entity. It <code>extends IdTable[YourEntityId, YourEntity]</code>, which
             accepts table name (and optionally schema name).
         </li>
     </ul>
@@ -169,7 +169,7 @@
     </code></pre>
 
     <p>
-        Than, in <strong>CommentsService</strong> you can create service method for searching comments by userId:
+        Than, in <code>CommentsService</code> you can create service method for searching comments by userId:
     </p>
 
     <pre><code>
