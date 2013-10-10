@@ -1,4 +1,4 @@
-package db
+package play.api.db.slick.ids
 
 import scala.language.postfixOps
 
@@ -8,34 +8,7 @@ import scala.language.postfixOps
  *
  * @author Krzysztof Romanowski
  */
-object TupleUtils {
-
-  def genCode(n: Int): String = {
-    (1 to n).map {
-      number =>
-        val types = genTypes(number)
-        val mapping = genMapping(number)
-        s"def reduce[R, $types](t:(R, $types)):($types)=($mapping)"
-    }.mkString("\n")
-  }
-
-  /**
-   * returns type parameter for tuple    "A1, A2"
-   * @param n
-   * @param typeLetter
-   * @return
-   */
-  def genTypes(n: Int, typeLetter: String = "A"): String = (1 to n).map(typeLetter +).mkString(", ")
-
-  /**
-   * returns call for tumple eg. "t._2, t_3"
-   * @param n
-   * @param offset
-   * @return
-   */
-  private def genMapping(n: Int, offset: Int = 1) = (1 + offset to n + offset).map("t._" +).mkString(", ")
-
-  //output
+private[ids] object TupleUtils {
 
   def reduce[R, A1](t: (R, A1)): (A1) = (t._2)
 

@@ -4,6 +4,7 @@ import model.{ UserId, Comments, Comment, CommentId }
 import scala.slick.lifted.Parameters
 import scala.slick.session.Session
 import play.api.db.slick.Config.driver.simple._
+import play.api.db.slick.ids.services._
 
 trait CommentsQueries extends BaseIdQueries[CommentId, Comment] {
   override def table = Comments

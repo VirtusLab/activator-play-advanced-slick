@@ -1,11 +1,11 @@
 <html>
 <head>
-    <title>Play Slick with Typesafe IDs - Activator Template</title>
+    <title>Play Slick with type-safe IDs - Activator Template</title>
 </head>
 <body>
 <div>
     <p>
-        You've just created an application with the Play Slick with Typesafe IDs template. This template allows you to
+        You've just created an application with the Play Slick with type-safe IDs template. This template allows you to
         quickly create a Play application using Slick for database access. The template has been pre-configured to use
         an in-memory database called H2.
 
@@ -103,14 +103,9 @@
     <h2>Create the models</h2>
 
     <p>
-        In order to create a set of models in play that will use Slick to access the database, you need to create the
-        models. The Slick site at <a href="http://slick.typesafe.com" target="_blank">slick.typesafe.com</a>
-        has an excellent set of documentation.
-    </p>
-
-    <p>
-        This template, however, uses small library that enables usage of type safe primary and foreign keys in
-        your application. Example entity created with this library can be shown <a href="#code/app/model/User.scala" class="shortcut">here.</a>
+        This template uses small library that enables usage of type safe primary and foreign keys in
+        your application. Example entity created with this library can be shown <a href="#code/app/model/User.scala"
+                                                                                   class="shortcut">here.</a>
     </p>
 
     <p>Entity declaration contains of four parts:</p>
@@ -127,6 +122,10 @@
         </li>
     </ul>
 
+    <p>
+        In case of any problems related to Slick its' site at <a href="http://slick.typesafe.com" target="_blank">slick.typesafe.com</a>
+        has an excellent set of documentation.
+    </p>
 
 </div>
 
@@ -169,7 +168,7 @@
     </code></pre>
 
     <p>
-        Than, in <code>CommentsService</code> you can create service method for searching comments by userId:
+        Then, in <code>CommentsService</code> you can create service method for searching comments by userId:
     </p>
 
     <pre><code>

@@ -1,4 +1,4 @@
-package db
+package play.api.db.slick.ids
 
 import play.api.db.slick.Config.driver.simple.{ Column => _, _ }
 import scala.slick.lifted._
@@ -10,20 +10,7 @@ import scala.slick.session.Session
  *
  * @author krzysiek
  */
-object SavingMethods {
-  def generateOne(n: Int): String = {
-    val types = TupleUtils.genTypes(n, "B")
-
-    s"""protected def saveBase[$types](proj: Projection$n[$types], unapply: A => Option[(Option[I], $types)])(v: A)(implicit s: Session): I =
-		  |		unapply(v).map(tuple => (proj returning id) insert TupleUtils.reduce(tuple)).getOrElse(throw Error(v))""".stripMargin
-  }
-
-  def generate: String =
-    (1 to 22).map(generateOne).mkString("\n")
-
-}
-
-trait SavingMethods[I <: BaseId, A <: WithId[I], T <: IdTable[I, A]] {
+private[ids] trait SavingMethods[I <: BaseId, A <: WithId[I], T <: IdTable[I, A]] {
   self: T =>
 
   private def Error(value: A) = new RuntimeException(s"Unapply in saveBase returned None. Value: $value")

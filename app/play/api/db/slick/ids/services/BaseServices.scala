@@ -1,61 +1,12 @@
-package service
+package play.api.db.slick.ids.services
 
 import java.sql.SQLException
 import play.api.db.slick.Config.driver.simple._
 import slick.session.Session
-import db.{WithId, IdTable, BaseId}
+import play.api.db.slick.ids.{ WithId, BaseId }
 
 /**
- * Base class for all queries.
- *
- * @tparam A type of element that is queried
- * @author Jerzy Müller
- */
-trait BaseQueries[A] {
-
-  /** @return table to operate on */
-  protected def table: Table[A]
-
-  /** query that returns all */
-  protected lazy val allQuery = Query(table)
-}
-
-/**
- * Base class for all queries with an [[db.BaseId]].
- *
- * @tparam I type of id
- * @tparam A type of element that is queried
- * @author Jerzy Müller
- */
-trait BaseIdQueries[I <: BaseId, A <: WithId[I]] {
-
-  /** @return table to operate on; it must be an IdTable */
-  protected def table: Table[A] with IdTable[I, A]
-
-  /** query that returns all */
-  protected lazy val allQuery = Query(table)
-
-  /** @return type mapper for I, required for querying */
-  protected implicit def mapping: IdTable.NTM[I] = table.mapping
-
-  /** Query element by id, parametrized version. */
-  protected lazy val byIdQuery = for {
-    id <- Parameters[I]
-    o <- table if o.id === id
-  } yield o
-
-  /** Query all ids. */
-  protected lazy val allIdsQuery = allQuery.map(_.id)
-
-  /** Query element by id, method version. */
-  protected def byIdFunc(id: I) = allQuery.filter(_.id === id)
-
-  /** Query by multiple ids. */
-  protected def byIdsQuery(ids: Seq[I]) = allQuery.filter(_.id inSet ids)
-}
-
-/**
- * Base trait for services.
+ * Base for services for entities that have no type-safe id created - for example join tables.
  *
  * @tparam A type of entity
  * @author Jerzy Müller
@@ -91,6 +42,10 @@ trait BaseService[A] {
   }
 
   /**
+   * Checks if element exists in database. It have to be implemented by user,
+   * because this is service for entities without an id and generic method
+   * could not be created.
+   *
    * @param elem element to check for
    * @param session implicit database session
    * @return true if element exists in database
@@ -99,7 +54,7 @@ trait BaseService[A] {
 }
 
 /**
- * Base trait for services where we use [[db.BaseId]]s.
+ * Base trait for services where we use [[play.api.db.slick.ids.BaseId]]s.
  *
  * @tparam I type of id
  * @tparam A type of entity

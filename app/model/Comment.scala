@@ -1,8 +1,8 @@
 package model
 
 import org.joda.time.DateTime
-import db.{WithId, IdTable, IdCompanion, BaseId}
 import scala.slick.session.Session
+import play.api.db.slick.ids._
 
 case class CommentId(id: Long) extends AnyVal with BaseId
 

@@ -11,7 +11,7 @@ class CommentsServiceTest extends Specification {
 
   "Comments Service" should {
 
-    "save and query for comments and users in" in new WithApplication {
+    "save and query for comments and users" in new WithApplication {
       DB.withSession {
         implicit session: Session =>
          // put test here

@@ -1,7 +1,7 @@
 package model
 
-import db.{ IdTable, WithId, IdCompanion, BaseId }
 import scala.slick.session.Session
+import play.api.db.slick.ids._
 
 /** Id class for type-safe joins and queries. */
 case class UserId(id: Long) extends AnyVal with BaseId

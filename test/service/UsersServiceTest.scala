@@ -10,7 +10,7 @@ class UsersServiceTest extends Specification {
 
   "Users Service" should {
 
-    "save and query users in" in new WithApplication {
+    "save and query users" in new WithApplication {
       DB.withSession {
         implicit session: Session =>
           object UsersService extends UsersService
