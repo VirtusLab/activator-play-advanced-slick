@@ -3,7 +3,7 @@ Advanced play-slick Typesafe Activator template
 
 Slick (the Scala Language-Integrated Connection Kit) is a framework for type-safe, composable data access in Scala. This template combines Play! Framework with Slick and adds tools to use type-safe IDs for your classes so you can no longer join on bad id field or mess up order of fields in mappings. It also provides a way to create service layer with methods (like querying all, querying by id, saving or deleting) for all classes with such IDs in just 4 lines of code.
 
-Idea for type-safe ids was derived from Slick creator's [presentation on ScalaDays 2013](http://www.parleys.com/play/51c2e20de4b0d38b54f46243/chapter63/about)
+Idea for type-safe ids was derived from Slick creator's [presentation on ScalaDays 2013](http://www.parleys.com/play/51c2e20de4b0d38b54f46243/chapter63/about).
 
 Examples
 ========
@@ -120,10 +120,12 @@ class UsersServiceTest extends Specification {
 
 Contributors
 ------------
-The idea if this activator is based on the work by [VirtusLab](http://www.virtuslab.com) team. 
+The activator is based on the work by [VirtusLab](http://www.virtuslab.com) team. 
 Main authors are:  
 * [Jerzy Müller](https://github.com/Kwestor)
 * [Krzysztof Romanowski](https://github.com/romanowski)
 * Rafał Pokrywka
+
+The project is a fork of super slick play activator template. 
 
 Feel free to use it, test it and to contribute!
