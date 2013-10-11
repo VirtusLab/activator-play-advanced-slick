@@ -1,13 +1,9 @@
-Advanced play-slick activator template
-======================================
+Advanced play-slick Typesafe Activator template
+===============================================
 
-Slick (the Scala Language-Integrated Connection Kit) is a framework for type safe, composable data access in Scala. This template combines Play Framework with Slick and adds tools to use type-safe IDs for your classes so you can no longer join on bad id field or mess up order of fields in mappings. It also provides way to create service with methods (like querying all, querying by id, saving or deleting), for all classes with such IDs in just 4 lines of code.
+Slick (the Scala Language-Integrated Connection Kit) is a framework for type-safe, composable data access in Scala. This template combines Play! Framework with Slick and adds tools to use type-safe IDs for your classes so you can no longer join on bad id field or mess up order of fields in mappings. It also provides a way to create service layer with methods (like querying all, querying by id, saving or deleting) for all classes with such IDs in just 4 lines of code.
 
-Authors
-=======
-
-* [Jerzy Müller](https://github.com/Kwestor)
-* [Krzysztof Romanowski](https://github.com/romanowski)
+Idea for type-safe ids was derived from Slick creator's [presentation on ScalaDays 2013](http://www.parleys.com/play/51c2e20de4b0d38b54f46243/chapter63/about)
 
 Examples
 ========
@@ -18,8 +14,8 @@ Defining entities
 ```scala
 package model
 
-import db.{ IdTable, WithId, IdCompanion, BaseId }
 import scala.slick.session.Session
+import play.api.db.slick.ids._
 
 /** Id class for type-safe joins and queries. */
 case class UserId(id: Long) extends AnyVal with BaseId
@@ -67,6 +63,7 @@ package service
 
 import model._
 import play.api.db.slick.Config.driver.simple._
+import play.api.db.slick.ids.services._
 
 /**
  * Queries for users.
@@ -120,3 +117,13 @@ class UsersServiceTest extends Specification {
   }
 }
 ```
+
+Contributors
+------------
+The idea if this activator is based on the work by [VirtusLab](http://www.virtuslab.com) team. 
+Main authors are:  
+* [Jerzy Müller](https://github.com/Kwestor)
+* [Krzysztof Romanowski](https://github.com/romanowski)
+* Rafał Pokrywka
+
+Feel free to use it, test it and to contribute!
