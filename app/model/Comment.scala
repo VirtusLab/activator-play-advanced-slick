@@ -15,16 +15,16 @@ case class Comment(id: Option[CommentId],
                    date: DateTime) extends WithId[CommentId]
 
 
-object Comments extends IdTable[CommentId, Comment]("comments") {
+object Comments extends IdTable[CommentId, Comment]("COMMENTS") {
 
-  def text = column[String]("text")
+  def text = column[String]("TEXT")
 
   // you can use your type-safe ID here - it will be mapped to long in database
-  def authorId = column[UserId]("author")
+  def authorId = column[UserId]("AUTHOR")
 
-  def author = foreignKey("comments_author_fk", authorId, Users)(_.id)
+  def author = foreignKey("COMMENTS_AUTHOR_FK", authorId, Users)(_.id)
 
-  def date = column[DateTime]("date")
+  def date = column[DateTime]("DATE")
 
   def base = text ~ authorId ~ date
 

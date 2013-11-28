@@ -13,5 +13,6 @@ dist
 /.project
 /RUNNING_PID
 /.settings
-/project/*-shim.sbt
-/activator-sbt-atmos-akka-shim.sbt
+*-shim.sbt
+/conf/evolutions/*
+atlassian-ide-plugin.xml

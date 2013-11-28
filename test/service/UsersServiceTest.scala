@@ -19,9 +19,9 @@ class UsersServiceTest extends Specification {
           val userId = UsersService save user
           val userOpt = UsersService findById userId
 
-          userOpt.map(_.email) must be_=== (Some(user.email))
-          userOpt.map(_.firstName) must be_=== (Some(user.firstName))
-          userOpt.map(_.lastName) must be_=== (Some(user.lastName))
+          userOpt.map(_.email) must beSome(user.email)
+          userOpt.map(_.firstName) must beSome(user.firstName)
+          userOpt.map(_.lastName) must beSome(user.lastName)
           userOpt.flatMap(_.id) must not be_=== None
       }
     }

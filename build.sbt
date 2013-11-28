@@ -17,7 +17,7 @@ libraryDependencies ++= Seq(
   "org.webjars" %% "webjars-play" % "2.2.0",
   "org.webjars" % "bootstrap" % "2.3.1",
   "com.typesafe.slick" %% "slick" % "1.0.1",
-  "com.typesafe.play" %% "play-slick" % "0.5.0.2-SNAPSHOT"
+  "com.typesafe.play" %% "play-slick" % "0.5.0.8"
   // Add your own project dependencies in the form:
   // "group" % "artifact" % "version"
 )

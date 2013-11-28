@@ -24,13 +24,13 @@ case class User(id: Option[UserId],
                 lastName: String) extends WithId[UserId]
 
 /** Table definition for users. */
-object Users extends IdTable[UserId, User]("users") {
+object Users extends IdTable[UserId, User]("USERS") {
 
-  def email = column[String]("email", O.NotNull)
+  def email = column[String]("EMAIL", O.NotNull)
 
-  def firstName = column[String]("first_name", O.NotNull)
+  def firstName = column[String]("FIRST_NAME", O.NotNull)
 
-  def lastName = column[String]("last_name", O.NotNull)
+  def lastName = column[String]("LAST_NAME", O.NotNull)
 
   def base = email ~ firstName ~ lastName
 
