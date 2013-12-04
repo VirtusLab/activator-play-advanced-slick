@@ -24,7 +24,9 @@
 
     <p>
         It is sometimes advantageous to use H2 in file mode rather than in memory. This will allow debugging through
-        things like the h2-browser or other methods of access to H2. To make this change, edit the conf/application.conf
+        things like the h2-browser or other methods of access to H2. To make this change, edit the <a
+            href="#code/conf/application.conf"
+            class="shortcut">conf/application.conf</a>
         file and find the line that specifies the default url:
 
         <pre><code>db.default.url="jdbc:h2:mem:play"</code></pre>
@@ -36,7 +38,7 @@
         You can then get access to the database by shutting down any processes (including Play) that are accessing it and
         using the following commands
 
-        <pre><code>play</code></pre>
+        <pre><code>activator</code></pre>
         <pre><code>h2-browser</code></pre>
 
         And then enter the same URL to access H2.
