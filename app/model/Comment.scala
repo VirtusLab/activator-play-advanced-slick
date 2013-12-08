@@ -2,7 +2,7 @@ package model
 
 import org.joda.time.DateTime
 import scala.slick.session.Session
-import play.api.db.slick.ids._
+import org.virtuslab.unicorn.ids._
 
 case class CommentId(id: Long) extends AnyVal with BaseId
 
