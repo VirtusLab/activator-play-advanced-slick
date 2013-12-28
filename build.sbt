@@ -20,7 +20,7 @@ libraryDependencies ++= Seq(
   "org.webjars" % "bootstrap" % "2.3.2",
   "com.typesafe.slick" %% "slick" % "1.0.1",
   "com.typesafe.play" %% "play-slick" % "0.5.0.8",
-  "org.virtuslab" %% "unicorn" % "0.4.1"
+  "org.virtuslab" %% "unicorn" % "0.4"
   // Add your own project dependencies in the form:
   // "group" % "artifact" % "version"
 )
