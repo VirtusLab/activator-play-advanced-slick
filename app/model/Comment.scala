@@ -1,8 +1,8 @@
 package model
 
+import org.virtuslab.unicorn.UnicornPlay._
+import org.virtuslab.unicorn.UnicornPlay.driver.simple._
 import org.joda.time.DateTime
-import scala.slick.session.Session
-import org.virtuslab.unicorn.ids._
 
 case class CommentId(id: Long) extends AnyVal with BaseId
 
@@ -15,22 +15,16 @@ case class Comment(id: Option[CommentId],
                    date: DateTime) extends WithId[CommentId]
 
 
-object Comments extends IdTable[CommentId, Comment]("COMMENTS") {
+class Comments(users: TableQuery[Users], tag: Tag) extends IdTable[CommentId, Comment](tag, "COMMENTS") {
 
   def text = column[String]("TEXT")
 
   // you can use your type-safe ID here - it will be mapped to long in database
   def authorId = column[UserId]("AUTHOR")
 
-  def author = foreignKey("COMMENTS_AUTHOR_FK", authorId, Users)(_.id)
+  def author = foreignKey("COMMENTS_AUTHOR_FK", authorId, users)(_.id)
 
   def date = column[DateTime]("DATE")
 
-  def base = text ~ authorId ~ date
-
-  override def * = id.? ~: base <> (Comment.apply _, Comment.unapply _)
-
-  override def insertOne(elem: Comment)(implicit session: Session): CommentId =
-    saveBase(base, Comment.unapply _)(elem)
-
+  override def * = (id.? , text , authorId , date) <> (Comment.tupled, Comment.unapply)
 }
