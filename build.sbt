@@ -4,8 +4,6 @@ version := "2.0.0"
 
 scalaVersion := "2.10.4"
 
-resolvers += Resolver.typesafeRepo("release")
-
 libraryDependencies ++= Seq(
   // Select Play modules
   //jdbc,      // The JDBC connection pool and the play.api.db API
