@@ -26,11 +26,11 @@ case class User(id: Option[UserId],
 /** Table definition for users. */
 class Users(tag: Tag) extends IdTable[UserId, User](tag, "USERS") {
 
-  def email = column[String]("EMAIL", O.NotNull)
+  def email = column[String]("EMAIL")
 
-  def firstName = column[String]("FIRST_NAME", O.NotNull)
+  def firstName = column[String]("FIRST_NAME")
 
-  def lastName = column[String]("LAST_NAME", O.NotNull)
+  def lastName = column[String]("LAST_NAME")
 
   override def * = (id.?, email, firstName, lastName ) <> (User.tupled,  User.unapply)
 
