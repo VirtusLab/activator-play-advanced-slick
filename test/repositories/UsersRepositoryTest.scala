@@ -1,12 +1,11 @@
-package service
+package repositories
 
 import model.{UserRow, Users}
 import org.virtuslab.unicorn.LongUnicornPlay.driver.simple._
 import play.api.db.slick.DB
 import play.api.test.{PlaySpecification, WithApplication}
-import repositories.UserRepository
 
-class UsersServiceTest extends PlaySpecification {
+class UsersRepositoryTest extends PlaySpecification {
 
   "Users Service" should {
 

@@ -26,6 +26,9 @@ case class UserRow(id: Option[UserId],
 /** Table definition for users. */
 class Users(tag: Tag) extends IdTable[UserId, UserRow](tag, "USERS") {
 
+  /** By definition id column is inserted as lowercase 'id',
+    * if you want to change it, here is your setting.
+    */
   protected override val idColumnName = "ID"
 
   def email = column[String]("EMAIL")
