@@ -1,12 +1,12 @@
 package model
 
-import org.virtuslab.unicorn.UnicornPlay._
-import org.virtuslab.unicorn.UnicornPlay.driver.simple._
+import org.virtuslab.unicorn.LongUnicornPlay._
+import org.virtuslab.unicorn.LongUnicornPlay.driver.simple._
 
 /** Id class for type-safe joins and queries. */
 case class UserId(id: Long) extends AnyVal with BaseId
 
-/** Companion object for id class, extends IdMapping
+/** Companion object for id class, extends IdCompanion
   * and brings all required implicits to scope when needed.
   */
 object UserId extends IdCompanion[UserId]
@@ -18,13 +18,15 @@ object UserId extends IdCompanion[UserId]
   * @param lastName lastName
   * @param firstName firstName
   */
-case class User(id: Option[UserId],
-                email: String,
-                firstName: String,
-                lastName: String) extends WithId[UserId]
+case class UserRow(id: Option[UserId],
+                   email: String,
+                   firstName: String,
+                   lastName: String) extends WithId[UserId]
 
 /** Table definition for users. */
-class Users(tag: Tag) extends IdTable[UserId, User](tag, "USERS") {
+class Users(tag: Tag) extends IdTable[UserId, UserRow](tag, "USERS") {
+
+  protected override val idColumnName = "ID"
 
   def email = column[String]("EMAIL")
 
@@ -32,6 +34,6 @@ class Users(tag: Tag) extends IdTable[UserId, User](tag, "USERS") {
 
   def lastName = column[String]("LAST_NAME")
 
-  override def * = (id.?, email, firstName, lastName ) <> (User.tupled,  User.unapply)
+  override def * = (id.?, email, firstName, lastName) <>(UserRow.tupled, UserRow.unapply)
 
 }

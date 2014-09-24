@@ -1,14 +1,12 @@
 package service
 
-import org.specs2.mutable.Specification
-import play.api.test.WithApplication
-import org.virtuslab.unicorn.UnicornPlay.driver.simple._
-import model.{Users, Comments}
-import play.api.db.slick._
-import org.virtuslab.unicorn.UnicornPlay._
+import model.{Comments, Users}
+import org.virtuslab.unicorn.LongUnicornPlay.driver.simple._
+import play.api.db.slick.DB
+import play.api.test.{PlaySpecification, WithApplication}
 import repositories.CommentRepository
 
-class CommentsServiceTest extends Specification {
+class CommentsServiceTest extends PlaySpecification {
 
   "Comments Service" should {
 

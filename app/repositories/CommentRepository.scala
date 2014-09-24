@@ -1,8 +1,8 @@
 package repositories
 
-import org.virtuslab.unicorn.UnicornPlay._
-import org.virtuslab.unicorn.UnicornPlay.driver.simple._
+import org.virtuslab.unicorn.LongUnicornPlay._
+import org.virtuslab.unicorn.LongUnicornPlay.driver.simple._
 import scala.slick.lifted.TableQuery
-import model.{CommentId, Comment, Comments}
+import model.{CommentId, CommentRow, Comments}
 
-class CommentRepository(query: TableQuery[Comments]) extends BaseIdRepository[CommentId, Comment, Comments](query)
+class CommentRepository(query: TableQuery[Comments]) extends BaseIdRepository[CommentId, CommentRow, Comments](query)
