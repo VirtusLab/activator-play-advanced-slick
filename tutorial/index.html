@@ -35,7 +35,7 @@
 
         <pre><code>db.default.url="jdbc:h2:/path/to/file</code></pre>
 
-        You can then get access to the database by shutting down any processes (including Play) that are accessing it and
+        You can then get access to the database by shutting down all processes (including Play) that are accessing it and
         using the following commands
 
         <pre><code>activator</code></pre>
@@ -46,7 +46,7 @@
 
     <p>
         To use a different database technology, use the instructions on the <a
-            href="http://www.playframework.com/documentation/2.3.x/ScalaDatabase">Play Documentation site</a>
+            href="https://www.playframework.com/documentation/2.4.x/ScalaDatabase">Play Documentation site</a>
     </p>
 
 </div>
@@ -56,7 +56,7 @@
 
     <p>
         Play includes a function called <a
-            href="http://www.playframework.com/documentation/2.3.x/Evolutions">evolutions</a> that allows the management
+            href="https://www.playframework.com/documentation/2.4.x/Evolutions">evolutions</a> that allows the management
         of database schema changes. To use evolutions, create an evolutions folder for the default database as
         <code>conf/evolutions/default</code>
         then create .sql scripts that will put the database into the appropriate state. Evolutions also has the ability
@@ -125,7 +125,7 @@ drop table "USERS";</code></pre>
         All of those needs following imports to work:
 
 <pre><code>import org.virtuslab.unicorn.LongUnicornPlay._
-import org.virtuslab.unicorn.LongUnicornPlay.driver.simple._</code></pre>
+import org.virtuslab.unicorn.LongUnicornPlay.driver.api._</code></pre>
 
         Those loads definitions from cake baked for Play! and `Long` keys. You can bake your own cake if you want to
         change something, more on this later in tutorial.
@@ -158,7 +158,7 @@ import org.virtuslab.unicorn.LongUnicornPlay.driver.simple._</code></pre>
     <p>
         Let's add new class to our model. It will be a <a href="#code/app/model/CommentRow.scala"
                                                           class="shortcut">Comment</a>. With an exception of class names
-        and fields it's same as <a href="#code/app/model/UserRow.scala" class="shortcut">User</a>.
+        and fields it's the same as <a href="#code/app/model/UserRow.scala" class="shortcut">User</a>.
     </p>
 
     <p>
@@ -167,36 +167,46 @@ import org.virtuslab.unicorn.LongUnicornPlay.driver.simple._</code></pre>
     </p>
 
 <pre><code>import model.UserId
-// parametrized query using UserId
-private val commentsForUserQuery = for {
-    userId <- Parameters[UserId]
-    // type-safe join, if you pass here any other id or Long it wont compile!
-    comment <- query if comment.authorId === userId
-} yield comment
+private[repositories] trait CommentQueries {
+   //query
+   private def commentsByAuthorIdQuery(authorId: Rep[UserId]) =
+       for {
+            comment <- Comments.query if comment.authorId === authorId
+       } yield comment
 
-final def findForUserId(userId: UserId)(implicit session: Session): Seq[CommentRow] =
-    commentsForUserQuery(userId).list
+   //compiled query
+   protected lazy val commentsByAuthorIdQueryCompiled = Compiled(commentsByAuthorIdQuery _)
+}
+
+class CommentRepository
+   extends BaseIdRepository[CommentId, CommentRow, Comments](Comments.query)
+   with CommentQueries {
+
+   //repository method using query from CommentQueries trait
+   def findForAuthorId(authorId: UserId): DBIO[Seq[CommentRow]] = {
+      commentsByAuthorIdQueryCompiled(authorId).result
+   }
+}
 </code></pre>
 
     <p>
         At last, let's test your new repository in <a href="#code/test/repositories/CommentsRepositoryTest.scala" class="shortcut">CommentsRepositoryTest</a>:
     </p>
 
-<pre><code>val user = UserRow(None, "test@email.com", "Krzysztof", "Nowak")
-val userId = userRepo save user
+<pre><code>//when
+val testCaseLogic = for {
+    userId <- userRepo.save(userRow)
+    comments = buildComments(userId)
+    commentsIds <- commentRepo.saveAll(comments)
+    queriedComments <- commentRepo.findForAuthorId(userId)
+} yield (comments, commentsIds, queriedComments)
 
-val comments = Seq(
-    CommentRow(None, "It's nice", userId, DateTime.now()),
-    CommentRow(None, "It's very nice", userId, DateTime.now()),
-    CommentRow(None, "Those comments are not spam", userId, DateTime.now())
-)
-
-val commentIds = commentRepo saveAll comments
-
-val queriedComments = commentRepo findForUserId userId
-
-queriedComments.size must be_=== (comments.size)
-queriedComments.flatMap(_.id) must containAllOf(commentIds)</code></pre>
+//then
+createSchema.andThen(testCaseLogic).map {
+   case (comments, commentsIds, queriedComments) =>
+       queriedComments.size shouldEqual comments.size
+       queriedComments.flatMap(_.id) should contain theSameElementsAs (commentsIds)
+   }</code></pre>
 </div>
 
 <div>
@@ -204,9 +214,9 @@ queriedComments.flatMap(_.id) must containAllOf(commentIds)</code></pre>
 
     <p>
         Your type-safe IDs are designed not only to work with Slick, but also with Play! framework internals. You can
-        also use them in mappings (beloved <a href="http://www.playframework.com/documentation/2.2.x/ScalaForms"
+        also use them in mappings (beloved <a href="http://www.playframework.com/documentation/2.4.x/ScalaForms"
                                               target="_blank">Play! forms API</a>) and <a
-            href="http://www.playframework.com/documentation/2.2.x/ScalaRouting" target="_blank">routes</a> without any
+            href="http://www.playframework.com/documentation/2.4.x/ScalaRouting" target="_blank">routes</a> without any
         added work and benefit from type-safety in you application.
     </p>
 
