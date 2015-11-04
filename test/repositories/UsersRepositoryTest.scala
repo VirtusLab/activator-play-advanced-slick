@@ -14,7 +14,7 @@ class UsersRepositoryTest extends PlaySpecification {
         val usersQuery: TableQuery[Users] = TableQuery[Users]
         val usersRepository = new UserRepository(usersQuery)
 
-        val user = UserRow(None, "test@email.com", "Krzysztof", "Nowak")
+        val user = UserRow(None, "test@example.com", "Krzysztof", "Nowak")
         val userId = usersRepository save user
         val userOpt = usersRepository findById userId
 
