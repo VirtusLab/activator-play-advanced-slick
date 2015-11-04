@@ -104,7 +104,7 @@ class UsersServiceTest extends Specification {
         implicit session: Session =>
           object UsersService extends UsersService
 
-          val user = User(None, "test@email.com", "Krzysztof", "Nowak")
+          val user = User(None, "test@example.com", "Krzysztof", "Nowak")
           val userId = UsersService save user
           val userOpt = UsersService findById userId
 

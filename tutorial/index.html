@@ -182,7 +182,7 @@ final def findForUserId(userId: UserId)(implicit session: Session): Seq[CommentR
         At last, let's test your new repository in <a href="#code/test/repositories/CommentsRepositoryTest.scala" class="shortcut">CommentsRepositoryTest</a>:
     </p>
 
-<pre><code>val user = UserRow(None, "test@email.com", "Krzysztof", "Nowak")
+<pre><code>val user = UserRow(None, "test@example.com", "Krzysztof", "Nowak")
 val userId = userRepo save user
 
 val comments = Seq(
