@@ -1,7 +1,7 @@
 package model
 
 import org.virtuslab.unicorn.LongUnicornPlay._
-import org.virtuslab.unicorn.LongUnicornPlay.driver.simple._
+import org.virtuslab.unicorn.LongUnicornPlay.driver.api._
 
 /** Id class for type-safe joins and queries. */
 case class UserId(id: Long) extends AnyVal with BaseId
@@ -39,4 +39,8 @@ class Users(tag: Tag) extends IdTable[UserId, UserRow](tag, "USERS") {
 
   override def * = (id.?, email, firstName, lastName) <>(UserRow.tupled, UserRow.unapply)
 
+}
+
+object Users {
+  val query = TableQuery[Users]
 }
