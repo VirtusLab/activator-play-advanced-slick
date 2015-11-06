@@ -7,8 +7,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class UsersRepositoryTest extends BasePlayTest {
 
-  "Users Service" should "save and query users" in runWithRollback {
-    val usersRepository = new UserRepository(Users.query)
+  "Users Repository" should "save and query users" in runWithRollback {
+    val usersRepository = new UserRepository()
 
     val user = UserRow(None, "test@email.com", "Krzysztof", "Nowak")
     val action = for {

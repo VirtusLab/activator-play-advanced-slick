@@ -7,9 +7,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class CommentsRepositoryTest extends BasePlayTest {
 
-  "Comments Service" should "save and query for comments and users" in runWithRollback {
+  "Comments Repository" should "save and query for comments and users" in runWithRollback {
     //given
-    val userRepo = new UserRepository(Users.query)
+    val userRepo = new UserRepository()
     val commentRepo = new CommentRepository()
 
     val createSchema = for {

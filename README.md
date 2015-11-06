@@ -14,13 +14,13 @@ Defining entities
 ```scala
 package model
 
-import scala.slick.session.Session
-import org.virtuslab.unicorn.ids._
+import org.virtuslab.unicorn.LongUnicornPlay._
+import org.virtuslab.unicorn.LongUnicornPlay.driver.api._
 
 /** Id class for type-safe joins and queries. */
 case class UserId(id: Long) extends AnyVal with BaseId
 
-/** Companion object for id class, extends IdMapping
+/** Companion object for id class, extends IdCompanion
   * and brings all required implicits to scope when needed.
   */
 object UserId extends IdCompanion[UserId]
@@ -32,87 +32,109 @@ object UserId extends IdCompanion[UserId]
   * @param lastName lastName
   * @param firstName firstName
   */
-case class User(id: Option[UserId],
-                email: String,
-                firstName: String,
-                lastName: String) extends WithId[UserId]
+case class UserRow(id: Option[UserId],
+                   email: String,
+                   firstName: String,
+                   lastName: String) extends WithId[UserId]
 
 /** Table definition for users. */
-object Users extends IdTable[UserId, User]("USERS") {
+class Users(tag: Tag) extends IdTable[UserId, UserRow](tag, "USERS") {
 
-  def email = column[String]("EMAIL", O.NotNull)
+  /** By definition id column is inserted as lowercase 'id',
+    * if you want to change it, here is your setting.
+    */
+  protected override val idColumnName = "ID"
 
-  def firstName = column[String]("FIRST_NAME", O.NotNull)
+  def email = column[String]("EMAIL")
 
-  def lastName = column[String]("LAST_NAME", O.NotNull)
+  def firstName = column[String]("FIRST_NAME")
 
-  def base = email ~ firstName ~ lastName
+  def lastName = column[String]("LAST_NAME")
 
-  override def * = id.? ~: base <> (User.apply _, User.unapply _)
+  override def * = (id.?, email, firstName, lastName) <>(UserRow.tupled, UserRow.unapply)
 
-  override def insertOne(elem: User)(implicit session: Session): UserId =
-    saveBase(base, User.unapply _)(elem)
+}
+
+object Users {
+  val query = TableQuery[Users]
 }
 ```
 
-Defining services
+Defining repositories
 -----------------
 
 ```scala
-package service
+package repositories
 
-import model._
-import play.api.db.slick.Config.driver.simple._
-import org.virtuslab.unicorn.ids.services._
+import org.virtuslab.unicorn.LongUnicornPlay._
+import org.virtuslab.unicorn.LongUnicornPlay.driver.api._
+import model.{UserRow, Users, UserId}
 
 /**
- * Queries for users.
- * It brings all base queries with it from [[service.BaseIdQueries]], but you can add yours as well.
- */
-trait UsersQueries extends BaseIdQueries[UserId, User] {
-  override def table = Users
+  * A place for user queries.
+  *
+  * Put your user queries here.
+  * Having them in separate in this trait keeps `UserRepository` neat and tidy.
+  */
+private[repositories] trait UserQueries {
+
+  protected lazy val userByEmailQuery = for {
+    email <- Parameters[String]
+    user <- Users.query if user.email === email
+  } yield user
 }
 
 /**
- * Service for users.
- *
- * It brings all base service methods with it from [[service.BaseIdService]], but you can add yours as well.
- *
- * It's a trait, so you can use your favourite DI method to instantiate/mix it to your application.
- */
-trait UsersService extends BaseIdService[UserId, User] with UsersQueries
+  * Repository for users.
+  *
+  * It brings all base service methods with it from [[org.virtuslab.unicorn.repositories.IdRepositories.BaseIdRepository]].
+  * You can add your methods as well.
+  */
+class UserRepository
+  extends BaseIdRepository[UserId, UserRow, Users](Users.query)
+  with UserQueries {
+
+  import scala.concurrent.ExecutionContext.Implicits.global
+
+  def findUserByEmail(email: String): DBIO[Option[UserRow]] = {
+    userByEmailQuery(email).result.map { foundUsers =>
+      if(foundUsers.size > 1) throw new IllegalStateException("...")
+      foundUsers.headOption
+    }
+  }
+
+}
+
 ```
 
 Usage
 -----
 
 ```scala
-package service
+package repositories
 
-import org.specs2.mutable.Specification
-import play.api.test.WithApplication
-import play.api.db.slick.DB
-import model.User
-import scala.slick.session.Session
+import model.{UserRow, Users}
+import org.virtuslab.unicorn.LongUnicornPlay.driver.api._
 
-class UsersServiceTest extends Specification {
+import scala.concurrent.ExecutionContext.Implicits.global
 
-  "Users Service" should {
+class UsersRepositoryTest extends BasePlayTest {
 
-    "save and query users in" in new WithApplication {
-      DB.withSession {
-        implicit session: Session =>
-          object UsersService extends UsersService
+  "Users Repository" should "save and query users" in runWithRollback {
+    val usersRepository = new UserRepository(Users.query)
 
-          val user = User(None, "test@email.com", "Krzysztof", "Nowak")
-          val userId = UsersService save user
-          val userOpt = UsersService findById userId
+    val user = UserRow(None, "test@email.com", "Krzysztof", "Nowak")
+    val action = for {
+      _ <- usersRepository.create
+      userId <- usersRepository.save(user)
+      userOpt <- usersRepository.findById(userId)
+    } yield userOpt
 
-          userOpt.map(_.email) must be_=== (Some(user.email))
-          userOpt.map(_.firstName) must be_=== (Some(user.firstName))
-          userOpt.map(_.lastName) must be_=== (Some(user.lastName))
-          userOpt.flatMap(_.id) must not be_=== None
-      }
+    action.map { userOpt =>
+      userOpt.map(_.email) shouldEqual Some(user.email)
+      userOpt.map(_.firstName) shouldEqual Some(user.firstName)
+      userOpt.map(_.lastName) shouldEqual Some(user.lastName)
+      userOpt.flatMap(_.id) should not be (None)
     }
   }
 }
@@ -120,10 +142,11 @@ class UsersServiceTest extends Specification {
 
 Contributors
 ------------
-The activator is based on the work by [VirtusLab](http://www.virtuslab.com) team. 
-Main authors are:  
+The activator is based on the work by [VirtusLab](http://www.virtuslab.com) team.
+Main authors are:
 * [Jerzy Müller](https://github.com/Kwestor)
 * [Krzysztof Romanowski](https://github.com/romanowski)
+* [Paweł Batko](https://github.com/pbatko)
 * Rafał Pokrywka
 
 The project is a fork of super slick play activator template. 
