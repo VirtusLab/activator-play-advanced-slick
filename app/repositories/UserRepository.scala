@@ -1,40 +1,82 @@
 package repositories
 
-import org.virtuslab.unicorn.LongUnicornPlay._
-import org.virtuslab.unicorn.LongUnicornPlay.driver.api._
-import model.{UserRow, Users, UserId}
+import com.google.inject.{Inject, Singleton}
+import model.{UserId, UserRow}
+import org.virtuslab.unicorn.{LongUnicornPlayJDBC, UnicornWrapper}
 
 /**
-  * A place for user queries.
+  * A place for all objects directly connected with database.
   *
   * Put your user queries here.
   * Having them in separate in this trait keeps `UserRepository` neat and tidy.
   */
-private[repositories] trait UserQueries {
+trait UserBaseRepositoryComponent {
+  self: UnicornWrapper[Long] =>
+  import unicorn._
+  import unicorn.driver.api._
 
-  protected lazy val userByEmailQuery = for {
-    email <- Parameters[String]
-    user <- Users.query if user.email === email
-  } yield user
+
+  /** Table definition for users. */
+  class Users(tag: Tag) extends IdTable[UserId, UserRow](tag, "USERS") {
+
+    /** By definition id column is inserted as lowercase 'id',
+      * if you want to change it, here is your setting.
+      */
+    protected override val idColumnName = "ID"
+
+    def email = column[String]("EMAIL")
+
+    def firstName = column[String]("FIRST_NAME")
+
+    def lastName = column[String]("LAST_NAME")
+
+    override def * = (id.?, email, firstName, lastName) <>(UserRow.tupled, UserRow.unapply)
+
+  }
+
+  object Users {
+    val query = TableQuery[Users]
+  }
+
+  trait UserQueries{
+
+    protected lazy val userByEmailQuery = for {
+      email <- Parameters[String]
+      user <- Users.query if user.email === email
+    } yield user
+
+  }
+
+  class UserBaseRepository
+    extends BaseIdRepository[UserId, UserRow, Users](TableQuery[Users])
+      with UserQueries {
+
+    import scala.concurrent.ExecutionContext.Implicits.global
+
+    def findUserByEmail(email: String): DBIO[Option[UserRow]] = {
+      userByEmailQuery(email).result.map { foundUsers =>
+        if(foundUsers.size > 1) throw new IllegalStateException("...")
+        foundUsers.headOption
+      }
+    }
+
+  }
+
+  val userBaseRepository = new UserBaseRepository
+
 }
+@Singleton()
+class UserRepository @Inject() (val unicorn: LongUnicornPlayJDBC)
+  extends UserBaseRepositoryComponent with UnicornWrapper[Long] {
 
-/**
-  * Repository for users.
-  *
-  * It brings all base service methods with it from [[org.virtuslab.unicorn.repositories.IdRepositories.BaseIdRepository]].
-  * You can add your methods as well.
-  */
-class UserRepository
-  extends BaseIdRepository[UserId, UserRow, Users](Users.query)
-  with UserQueries {
-
+  import unicorn.driver.api._
   import scala.concurrent.ExecutionContext.Implicits.global
 
   def findUserByEmail(email: String): DBIO[Option[UserRow]] = {
-    userByEmailQuery(email).result.map { foundUsers =>
-      if(foundUsers.size > 1) throw new IllegalStateException("...")
-      foundUsers.headOption
-    }
+    userBaseRepository.findUserByEmail(email)
   }
 
+  def save(user: UserRow): DBIO[UserId] = {
+    userBaseRepository.save(user)
+  }
 }

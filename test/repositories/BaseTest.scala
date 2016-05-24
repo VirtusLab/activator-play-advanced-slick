@@ -3,11 +3,11 @@ package repositories
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
-import org.virtuslab.unicorn.{HasJdbcDriver, LongUnicornPlay, Unicorn}
-import org.virtuslab.unicorn.LongUnicornPlay.driver.api._
-import play.api.Play
-import play.api.test.FakeApplication
-import slick.dbio.DBIOAction
+import org.virtuslab.unicorn.{HasJdbcDriver, LongUnicornPlay, UnicornPlay, UnicornWrapper}
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.{Environment, Play}
+import play.api.inject.guice.GuiceApplicationBuilder
+import slick.driver.JdbcProfile
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -15,7 +15,10 @@ import scala.concurrent.duration._
 
 trait BaseTest[Underlying] extends FlatSpecLike with Matchers with BeforeAndAfterEach with ScalaFutures {
 
-  val unicorn: Unicorn[Underlying] with HasJdbcDriver
+  self: UnicornWrapper[Underlying] =>
+
+  import unicorn.driver.api._
+  import unicorn._
 
   val dbURL = "jdbc:h2:mem:unicorn"
 
@@ -47,7 +50,8 @@ trait BasePlayTest
   with Matchers
   with BeforeAndAfterEach
   with BaseTest[Long]
-  with BeforeAndAfterAll {
+  with BeforeAndAfterAll
+  with UnicornWrapper[Long] {
 
   private val testDb = Map(
     "slick.dbs.default.driver" -> "slick.driver.H2Driver$",
@@ -57,13 +61,17 @@ trait BasePlayTest
     "slick.dbs.default.db.password" -> ""
   )
 
-  implicit val app: FakeApplication = {
-    val fake = new FakeApplication(additionalConfiguration = testDb)
+  implicit val app = {
+    val fake = new GuiceApplicationBuilder()
+      .configure(testDb)
+      .in(Environment.simple())
+      .build
     Play.start(fake)
     fake
   }
 
-  override lazy val unicorn: Unicorn[Long] with HasJdbcDriver = LongUnicornPlay
+  override lazy val unicorn: UnicornPlay[Long] with HasJdbcDriver =
+    new LongUnicornPlay(DatabaseConfigProvider.get[JdbcProfile](app))
 
   import unicorn.driver.api._
 

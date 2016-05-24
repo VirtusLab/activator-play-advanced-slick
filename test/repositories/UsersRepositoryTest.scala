@@ -1,20 +1,18 @@
 package repositories
 
-import model.{UserRow, Users}
-import org.virtuslab.unicorn.LongUnicornPlay.driver.api._
+import model.UserRow
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class UsersRepositoryTest extends BasePlayTest {
+class UsersRepositoryTest extends BasePlayTest with UserBaseRepositoryComponent {
 
   "Users Repository" should "save and query users" in runWithRollback {
-    val usersRepository = new UserRepository()
 
     val user = UserRow(None, "test@email.com", "Krzysztof", "Nowak")
     val action = for {
-      _ <- usersRepository.create
-      userId <- usersRepository.save(user)
-      userOpt <- usersRepository.findById(userId)
+      _ <- userBaseRepository.create
+      userId <- userBaseRepository.save(user)
+      userOpt <- userBaseRepository.findById(userId)
     } yield userOpt
 
     action.map { userOpt =>
