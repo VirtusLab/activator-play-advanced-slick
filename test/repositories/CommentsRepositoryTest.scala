@@ -2,19 +2,18 @@ package repositories
 
 import model._
 import org.joda.time.DateTime
+import org.virtuslab.unicorn.UnicornPlay
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class CommentsRepositoryTest extends BasePlayTest {
+class CommentsRepositoryTest extends BasePlayTest with CommentBaseRepositoryComponents with UserBaseRepositoryComponent{
 
   "Comments Repository" should "save and query for comments and users" in runWithRollback {
     //given
-    val userRepo = new UserRepository()
-    val commentRepo = new CommentRepository()
 
     val createSchema = for {
-      _ <- userRepo.create
-      _ <- commentRepo.create
+      _ <- userBaseRepository.create
+      _ <- commentBaseRepository.create
     } yield ()
 
     val userRow = UserRow(None, "test@example.com", "Krzysztof", "Nowak")

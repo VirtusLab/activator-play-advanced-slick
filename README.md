@@ -14,11 +14,11 @@ Defining entities
 ```scala
 package model
 
-import org.virtuslab.unicorn.LongUnicornPlay._
-import org.virtuslab.unicorn.LongUnicornPlay.driver.api._
+import org.virtuslab.unicorn.{BaseId, WithId}
+import org.virtuslab.unicorn.LongUnicornPlayIdentifiers._
 
 /** Id class for type-safe joins and queries. */
-case class UserId(id: Long) extends AnyVal with BaseId
+case class UserId(id: Long) extends AnyVal with BaseId[Long]
 
 /** Companion object for id class, extends IdCompanion
   * and brings all required implicits to scope when needed.
@@ -35,29 +35,7 @@ object UserId extends IdCompanion[UserId]
 case class UserRow(id: Option[UserId],
                    email: String,
                    firstName: String,
-                   lastName: String) extends WithId[UserId]
-
-/** Table definition for users. */
-class Users(tag: Tag) extends IdTable[UserId, UserRow](tag, "USERS") {
-
-  /** By definition id column is inserted as lowercase 'id',
-    * if you want to change it, here is your setting.
-    */
-  protected override val idColumnName = "ID"
-
-  def email = column[String]("EMAIL")
-
-  def firstName = column[String]("FIRST_NAME")
-
-  def lastName = column[String]("LAST_NAME")
-
-  override def * = (id.?, email, firstName, lastName) <>(UserRow.tupled, UserRow.unapply)
-
-}
-
-object Users {
-  val query = TableQuery[Users]
-}
+                   lastName: String) extends WithId[Long, UserId]
 ```
 
 Defining repositories
@@ -66,43 +44,79 @@ Defining repositories
 ```scala
 package repositories
 
-import org.virtuslab.unicorn.LongUnicornPlay._
-import org.virtuslab.unicorn.LongUnicornPlay.driver.api._
-import model.{UserRow, Users, UserId}
+import model.{UserId, UserRow}
+import org.virtuslab.unicorn.{UnicornPlay, UnicornWrapper}
 
 /**
-  * A place for user queries.
+  * A place for all objects directly connected with database.
   *
   * Put your user queries here.
   * Having them in separate in this trait keeps `UserRepository` neat and tidy.
   */
-private[repositories] trait UserQueries {
+trait UserBaseRepositoryComponent {
+  self: UnicornWrapper[Long] =>
+  import unicorn._
+  import unicorn.driver.api._
 
-  protected lazy val userByEmailQuery = for {
-    email <- Parameters[String]
-    user <- Users.query if user.email === email
-  } yield user
-}
 
-/**
-  * Repository for users.
-  *
-  * It brings all base service methods with it from [[org.virtuslab.unicorn.repositories.IdRepositories.BaseIdRepository]].
-  * You can add your methods as well.
-  */
-class UserRepository
-  extends BaseIdRepository[UserId, UserRow, Users](Users.query)
-  with UserQueries {
+  /** Table definition for users. */
+  class Users(tag: Tag) extends IdTable[UserId, UserRow](tag, "USERS") {
 
-  import scala.concurrent.ExecutionContext.Implicits.global
+    /** By definition id column is inserted as lowercase 'id',
+      * if you want to change it, here is your setting.
+      */
+    protected override val idColumnName = "ID"
 
-  def findUserByEmail(email: String): DBIO[Option[UserRow]] = {
-    userByEmailQuery(email).result.map { foundUsers =>
-      if(foundUsers.size > 1) throw new IllegalStateException("...")
-      foundUsers.headOption
-    }
+    def email = column[String]("EMAIL")
+
+    def firstName = column[String]("FIRST_NAME")
+
+    def lastName = column[String]("LAST_NAME")
+
+    override def * = (id.?, email, firstName, lastName) <>(UserRow.tupled, UserRow.unapply)
+
   }
 
+  object Users {
+    val query = TableQuery[Users]
+  }
+
+  trait UserQueries{
+
+    protected lazy val userByEmailQuery = for {
+      email <- Parameters[String]
+      user <- Users.query if user.email === email
+    } yield user
+
+  }
+
+  class UserBaseRepository
+    extends BaseIdRepository[UserId, UserRow, Users](TableQuery[Users])
+      with UserQueries {
+
+    import scala.concurrent.ExecutionContext.Implicits.global
+
+    def findUserByEmail(email: String): DBIO[Option[UserRow]] = {
+      userByEmailQuery(email).result.map { foundUsers =>
+        if(foundUsers.size > 1) throw new IllegalStateException("...")
+        foundUsers.headOption
+      }
+    }
+
+  }
+
+  val userBaseRepository = new UserBaseRepository
+
+}
+
+class UserRepository(protected val unicorn: UnicornPlay[Long])
+  extends UserBaseRepositoryComponent with UnicornWrapper[Long] {
+
+  import unicorn.driver.api._
+
+  def findUserByEmail(email: String): DBIO[Option[UserRow]] = {
+    userBaseRepository.findUserByEmail(email)
+  }
 }
 
 ```
@@ -113,21 +127,19 @@ Usage
 ```scala
 package repositories
 
-import model.{UserRow, Users}
-import org.virtuslab.unicorn.LongUnicornPlay.driver.api._
+import model.UserRow
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class UsersRepositoryTest extends BasePlayTest {
+class UsersRepositoryTest extends BasePlayTest with UserBaseRepositoryComponent {
 
   "Users Repository" should "save and query users" in runWithRollback {
-    val usersRepository = new UserRepository(Users.query)
 
     val user = UserRow(None, "test@email.com", "Krzysztof", "Nowak")
     val action = for {
-      _ <- usersRepository.create
-      userId <- usersRepository.save(user)
-      userOpt <- usersRepository.findById(userId)
+      _ <- userBaseRepository.create
+      userId <- userBaseRepository.save(user)
+      userOpt <- userBaseRepository.findById(userId)
     } yield userOpt
 
     action.map { userOpt =>
@@ -147,6 +159,7 @@ Main authors are:
 * [Jerzy Müller](https://github.com/Kwestor)
 * [Krzysztof Romanowski](https://github.com/romanowski)
 * [Paweł Batko](https://github.com/pbatko)
+* [Krzysztof Borowski](https://github.com/liosedhel)
 * Rafał Pokrywka
 
 The project is a fork of super slick play activator template. 
